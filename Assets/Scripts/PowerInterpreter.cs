@@ -44,13 +44,16 @@ public partial class PowerInterpreter : MonoBehaviour
 
     private Button _endTurnButton;
 
-    private Game _game;
+    public Game _game;
+  
+
 
     private bool DoUpdatedOptions;
 
     private int _stepper;
 
     private ConcurrentQueue<IPowerHistoryEntry> _historyEntries;
+
 
     public void AddHistoryEntry(IPowerHistoryEntry historyEntry)
     {
@@ -159,6 +162,57 @@ public partial class PowerInterpreter : MonoBehaviour
         _gameStepper = DruidVsWarriorMoves;
     }
 
+    public void UpdateGraphics()
+    {
+        _game.PowerHistory.Last.ForEach(p =>
+        {
+            _historyEntries.Enqueue(p);
+            PowerHistoryText.text = _historyEntries.Count().ToString();
+        });
+        PowerHistoryText.text = _historyEntries.Count().ToString();
+
+        _powerEntityChoices = PowerChoicesBuilder.EntityChoices(_game, _game.Player1.Choice);
+
+        var powerOptions = PowerOptionsBuilder.AllOptions(_game, _game.Player1.Options());
+        _powerOptions = new PowerOptions()
+        {
+            Index = powerOptions.Index,
+            PowerOptionList = powerOptions.PowerOptionList
+        };
+    }
+
+    // We use this to create the playable game loading game config 
+    public void InitializePlayable()
+    {
+        SetPlayerAndUserInfo(1, null, null);
+        _game = new Game(PaladinVsPriest(Seed));
+
+
+        _game.StartGame();
+        UpdateGraphics();
+
+        // Start the game
+
+        //_game.PowerHistory.Last.ForEach(p =>
+        //{
+        //    _historyEntries.Enqueue(p);
+        //    PowerHistoryText.text = _historyEntries.Count().ToString();
+        //});
+        //PowerHistoryText.text = _historyEntries.Count().ToString();
+
+        //_powerEntityChoices = PowerChoicesBuilder.EntityChoices(_game, _game.Player1.Choice);
+
+        //var powerOptions = PowerOptionsBuilder.AllOptions(_game, _game.Player1.Options());
+        //_powerOptions = new PowerOptions()
+        //{
+        //    Index = powerOptions.Index,
+        //    PowerOptionList = powerOptions.PowerOptionList
+        //};
+
+
+
+    }
+
     public void InitializeReplay()
     {
         TextAsset txt = (TextAsset)Resources.Load("Test");
@@ -249,21 +303,7 @@ public partial class PowerInterpreter : MonoBehaviour
         _btnStepper.interactable = false;
 
         _gameStepper(_stepper, _game);
-        _game.PowerHistory.Last.ForEach(p =>
-        {
-            _historyEntries.Enqueue(p);
-            PowerHistoryText.text = _historyEntries.Count().ToString();
-        });
-        PowerHistoryText.text = _historyEntries.Count().ToString();
-
-        _powerEntityChoices = PowerChoicesBuilder.EntityChoices(_game, _game.Player1.Choice);
-
-        var powerOptions = PowerOptionsBuilder.AllOptions(_game, _game.Player1.Options());
-        _powerOptions = new PowerOptions()
-        {
-            Index = powerOptions.Index,
-            PowerOptionList = powerOptions.PowerOptionList
-        };
+        UpdateGraphics();
 
         _stepper++;
 
@@ -311,13 +351,14 @@ public partial class PowerInterpreter : MonoBehaviour
                 }
             }
 
-            _endTurnButton.interactable = PlayerState == PlayerClientState.Option;
+            //_endTurnButton.interactable = PlayerState == PlayerClientState.Option;
         }
     }
 
     public void OnClickEndTurn()
     {
-
+        _game.Process(EndTurnTask.Any(_game.CurrentPlayer));
+        UpdateGraphics();
     }
 
     //public void ReadHistory(List<IPowerHistoryEntry> powerHistoryEntries)
@@ -385,7 +426,7 @@ public partial class PowerInterpreter : MonoBehaviour
     {
         if (_powerOptions == null || _powerOptions.PowerOptionList == null || _powerOptions.PowerOptionList.Count == 0)
         {
-            _endTurnButton.interactable = false;
+           // _endTurnButton.interactable = false;
             return false;
         }
 
@@ -710,13 +751,13 @@ public partial class PowerInterpreter : MonoBehaviour
         }
 
         //only interpret minion, spell & weapons, no hero & hero power
-        if (entityExt.Tags.ContainsKey(GameTag.CARDTYPE)
-            && entityExt.CardType != CardType.MINION
-            && entityExt.CardType != CardType.SPELL
-            && entityExt.CardType != CardType.WEAPON)
-        {
-            throw new Exception($"No zone changes currently implemented for {entityExt.CardType} from {prevZone} to {nextZone}!");
-        }
+        //if (entityExt.Tags.ContainsKey(GameTag.CARDTYPE)
+        //    && entityExt.CardType != CardType.MINION
+        //    && entityExt.CardType != CardType.SPELL
+        //    && entityExt.CardType != CardType.WEAPON)
+        //{
+        //    throw new Exception($"No zone changes currently implemented for {entityExt.CardType} from {prevZone} to {nextZone}!");
+        //}
 
         switch (prevZone)
         {
@@ -756,6 +797,8 @@ public partial class PowerInterpreter : MonoBehaviour
                                 heroWeaponGen.Generate(entityExt);
                                 entityExt.GameObjectScript = heroWeaponGen;
                                 break;
+
+                  
 
                             default:
                                 Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
