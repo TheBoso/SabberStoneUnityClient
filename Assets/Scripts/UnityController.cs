@@ -1,5 +1,6 @@
 ﻿using SabberStoneContract.Core;
 using SabberStoneContract.Interface;
+using SabberStoneCore.Enchants;
 using SabberStoneCore.Kettle;
 using System;
 using System.Collections;
@@ -202,6 +203,15 @@ public class UnityController : MonoBehaviour
         _boardCanvas.SetActive(true);
 
         PowerInterpreter.InitializeDebug();
+    }
+
+    public void OnClickPlayGame()
+    {
+        _clientPanel.gameObject.SetActive(false);
+        _board.SetActive(true);
+        _boardCanvas.SetActive(true);
+
+        PowerInterpreter.InitializePlayable();
     }
 
     public void OnClickReplayGame()

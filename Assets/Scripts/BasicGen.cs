@@ -28,6 +28,7 @@ public abstract class BasicGen : MonoBehaviour
     public virtual void UpdateEntity(EntityExt entityExt)
     {
         _entityExt = entityExt;
+
     }
 
     public int Tag(GameTag gameTag) => _entityExt.Tags[gameTag];

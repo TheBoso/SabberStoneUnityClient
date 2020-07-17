@@ -110,6 +110,9 @@ public class CardGen : AnimationGen
 
     private Sprite GetFrameSprite(CardType cardType, CardClass cardClass)
     {
+
+        int index = (int)cardClass;
+
         switch (cardType)
         {
             case CardType.INVALID:
@@ -121,9 +124,9 @@ public class CardGen : AnimationGen
             case CardType.HERO:
                 return null;
             case CardType.MINION:
-                return Resources.Load<Sprite>($"Sprites/inhand_minion_{cardClass.ToString().ToLower()}");
+                return FrameManager.instance.MinionFrameSprites[index];
             case CardType.SPELL:
-                return Resources.Load<Sprite>($"Sprites/inhand_spell_{cardClass.ToString().ToLower()}");
+                return FrameManager.instance.SpellFrameSprites[index];
             case CardType.ENCHANTMENT:
                 return null;
             case CardType.WEAPON:
@@ -186,8 +189,11 @@ public class CardGen : AnimationGen
 
     internal void ShowEntity(EntityExt entity)
     {
+
         CardType cardType = (CardType)entity.Tags[GameTag.CARDTYPE];
-        CardClass cardClass = entity.Tags.ContainsKey(GameTag.CLASS) ? (CardClass)entity.Tags[GameTag.CLASS] : CardClass.NEUTRAL;
+
+        // hacky way for now
+        CardClass cardClass = Cards.FromId(entity.CardId).Class;
 
         var front = transform.Find("Front");
 
@@ -261,6 +267,8 @@ public class CardGen : AnimationGen
 
         // set to visible
         Show(true);
+        gameObject.name = entity.CardId;
+
     }
 
 }

@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using SabberStoneBasicAI.Nodes;
+using SabberStoneBasicAI.Score;
 using SabberStoneContract.Core;
 using SabberStoneContract.Model;
 using SabberStoneCore.Config;
@@ -6,6 +8,7 @@ using SabberStoneCore.Enums;
 using SabberStoneCore.Kettle;
 using SabberStoneCore.Model;
 using SabberStoneCore.Tasks.PlayerTasks;
+using SabberStoneCore.Visualizer;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = System.Random;
 
 public partial class PowerInterpreter : MonoBehaviour
 {
@@ -32,11 +36,14 @@ public partial class PowerInterpreter : MonoBehaviour
 
     public GameObject ManaPrefab;
 
+    public GameObject Choice;
+
     private EntityExt attackingEntity;
 
     private EntityExt defendingEntity;
 
     private Transform gridParent, _mainGame, _myChoices, _myChoicesPanel;
+
 
     public bool AllAnimStatesAreNone => EntitiesExt.Values.ToList().TrueForAll(p => p.GameObjectScript == null || p.GameObjectScript.AnimState == AnimationState.NONE);
 
@@ -44,13 +51,16 @@ public partial class PowerInterpreter : MonoBehaviour
 
     private Button _endTurnButton;
 
-    private Game _game;
+    public Game _game;
+  
+
 
     private bool DoUpdatedOptions;
 
     private int _stepper;
 
     private ConcurrentQueue<IPowerHistoryEntry> _historyEntries;
+
 
     public void AddHistoryEntry(IPowerHistoryEntry historyEntry)
     {
@@ -75,7 +85,7 @@ public partial class PowerInterpreter : MonoBehaviour
 
     private int _currentPowerOptionsIndex;
 
-    public Text PowerHistoryText, PowerOptionsText, PowerChoicesText, PlayerStateText;
+    public Text PowerHistoryText, PowerOptionsText, PowerChoicesText, PlayerStateText, loggerText;
 
     public EntityExt MyPlayer => EntitiesExt.Values.FirstOrDefault(p => p.Tags.TryGetValue(GameTag.PLAYER_ID, out int value) && value == _playerId);
 
@@ -90,6 +100,10 @@ public partial class PowerInterpreter : MonoBehaviour
     public bool UpdateUserInfo = false;
 
     public long Seed = 1111;
+
+    public GameObject playerOptions;
+
+    private IScore playerScore;
 
     public enum PlayerClientState
     {
@@ -149,7 +163,9 @@ public partial class PowerInterpreter : MonoBehaviour
         _historyEntries = new ConcurrentQueue<IPowerHistoryEntry>();
 
         _btnStepper = boardCanvas.transform.Find("Panel").Find("Buttons").Find("BtnStepper").GetComponent<Button>();
+        
 
+        playerScore = null;
     }
 
     public void InitializeDebug()
@@ -157,6 +173,203 @@ public partial class PowerInterpreter : MonoBehaviour
         SetPlayerAndUserInfo(1, null, null);
         _game = new Game(DruidVsWarrior(Seed));
         _gameStepper = DruidVsWarriorMoves;
+    }
+
+    public void UpdateGraphics()
+    {
+        _game.PowerHistory.Last.ForEach(p =>
+        {
+            _historyEntries.Enqueue(p);
+            PowerHistoryText.text = _historyEntries.Count().ToString();
+        });
+        PowerHistoryText.text = _historyEntries.Count().ToString();
+
+        _powerEntityChoices = PowerChoicesBuilder.EntityChoices(_game, _game.Player1.Choice);
+
+        var powerOptions = PowerOptionsBuilder.AllOptions(_game, _game.Player1.Options());
+        _powerOptions = new PowerOptions()
+        {
+            Index = powerOptions.Index,
+            PowerOptionList = powerOptions.PowerOptionList
+        };
+
+        //Update Player option buttons
+
+        if (_game.CurrentPlayer == _game.Player1)
+        {
+
+
+    
+        List<PlayerTask> solution = _game.Player1.Options();
+
+            //Clear all current buttons
+            var children = playerOptions.GetComponentInChildren<Transform>();
+            foreach(Transform child in children)
+            {
+                Destroy(child.gameObject);
+            }
+
+        // create new choices
+        for (int i = 0; i < solution.Count; i++)
+        {
+            GameObject choiceBar = Instantiate(Choice);
+            choiceBar.transform.SetParent(playerOptions.transform);
+
+            PlayerChoice choiceCode = choiceBar.GetComponent<PlayerChoice>();
+                choiceCode.SetPowerInterpreter(this);
+
+            if (solution != null)
+            {
+                choiceCode.SetText(solution[i].ToString());
+                choiceCode.task = solution[i];
+            }
+        }
+        }
+    }
+
+    public void SetUpPlayerParameters()
+    {
+        GameObject P1 = GameObject.Find("P1Hero");
+        GameObject P2 = GameObject.Find("P2Hero");
+        SetupGame.Player1Hero = P1.GetComponentInChildren<Text>().text.ToString();
+        SetupGame.Player2Hero = P2.GetComponentInChildren<Text>().text.ToString();
+
+        // disable them
+
+        P1.SetActive(false);
+        P2.SetActive(false);
+
+
+    }
+
+    public List<Card> GetDeckFromHero(string id)
+    {
+        switch (id)
+        {
+            case "TBA01_1": // Rag
+                return PremadeDecks.RagnarosDeck();
+
+
+            case "TBA01_4": // Nef
+                return PremadeDecks.NefarianDeck();
+
+            case "BRMA09_1":
+                return PremadeDecks.RendBlackhandDeck();
+
+            case "ICCA08_001": // Lichking
+                throw new Exception("Deck not setup yet");
+
+            case "HERO_01": return PremadeDecks.WarriorDeck();
+            case "HERO_02": return PremadeDecks.ShamanDeck();
+            case "HERO_03": return PremadeDecks.RogueDeck();
+            case "HERO_04": return PremadeDecks.PaladinDeck();
+            case "HERO_05": return PremadeDecks.HunterDeck();
+            case "HERO_06": return PremadeDecks.DruidDeck();
+            case "HERO_07": return PremadeDecks.WarlockDeck();
+            case "HERO_08": return PremadeDecks.MageDeck();
+            case "HERO_09": return PremadeDecks.PriestDeck();
+
+
+
+
+            default:
+                // TODO: Random deck based on class
+                return PremadeDecks.RandomDeck();
+        }
+
+
+           
+    }
+
+    // We use this to create the playable game loading game config 
+    public void InitializePlayable()
+    {
+        Random RNG = new Random();
+        SetPlayerAndUserInfo(1, null, null);
+        SetUpPlayerParameters();
+
+        Card P1Hero;
+        Card P2Hero;
+        CardClass P1Class;
+        CardClass P2Class;
+
+        // Set player class based on the hero class
+
+        try
+        {
+             P1Hero = Cards.FromId(SetupGame.Player1Hero.ToUpper());
+             P1Class = P1Hero.Class;
+
+
+
+        }
+        catch
+        {
+            P1Hero = Cards.FromId("HERO_0" + RNG.Next(1, 9));
+            P1Class = P1Hero.Class;
+
+
+
+        }
+
+
+        try
+        {
+            P2Hero = Cards.FromId(SetupGame.Player2Hero.ToUpper());
+             P2Class = P2Hero.Class;
+
+        }
+
+
+        catch
+        {
+            P2Hero = Cards.FromId("HERO_0" + RNG.Next(1, 9));
+            P2Class = P2Hero.Class;
+
+
+
+
+        }
+        // We load specific deck based on what Hero the player has chosen for now
+        GameConfig newGame = new GameConfig
+        {
+
+            StartPlayer = 1,
+            FormatType = FormatType.FT_WILD,
+
+
+            Player1HeroCard = P1Hero,
+            Player1HeroClass = P1Class,
+            Player1Deck = GetDeckFromHero(P1Hero.Id),
+
+
+
+
+
+            Player2HeroCard = P2Hero,
+            Player2HeroClass = P2Class,
+            Player2Deck = GetDeckFromHero(P2Hero.Id),
+
+
+
+
+
+
+            SkipMulligan = true,
+            Shuffle = true,
+            FillDecks = false,
+            Logging = true,
+        };
+
+
+        _game = new Game(newGame);
+
+
+        _game.StartGame();
+        UpdateGraphics();
+      
+
+
     }
 
     public void InitializeReplay()
@@ -249,26 +462,14 @@ public partial class PowerInterpreter : MonoBehaviour
         _btnStepper.interactable = false;
 
         _gameStepper(_stepper, _game);
-        _game.PowerHistory.Last.ForEach(p =>
-        {
-            _historyEntries.Enqueue(p);
-            PowerHistoryText.text = _historyEntries.Count().ToString();
-        });
-        PowerHistoryText.text = _historyEntries.Count().ToString();
-
-        _powerEntityChoices = PowerChoicesBuilder.EntityChoices(_game, _game.Player1.Choice);
-
-        var powerOptions = PowerOptionsBuilder.AllOptions(_game, _game.Player1.Options());
-        _powerOptions = new PowerOptions()
-        {
-            Index = powerOptions.Index,
-            PowerOptionList = powerOptions.PowerOptionList
-        };
+        UpdateGraphics();
 
         _stepper++;
 
         _btnStepper.interactable = true;
     }
+
+  
 
 
     public void SetPlayerAndUserInfo(int playerId, UserInfo myUserInfo, UserInfo opUserInfo)
@@ -311,13 +512,14 @@ public partial class PowerInterpreter : MonoBehaviour
                 }
             }
 
-            _endTurnButton.interactable = PlayerState == PlayerClientState.Option;
+            //_endTurnButton.interactable = PlayerState == PlayerClientState.Option;
         }
     }
 
     public void OnClickEndTurn()
     {
-
+        _game.Process(EndTurnTask.Any(_game.CurrentPlayer));
+        UpdateGraphics();
     }
 
     //public void ReadHistory(List<IPowerHistoryEntry> powerHistoryEntries)
@@ -385,7 +587,7 @@ public partial class PowerInterpreter : MonoBehaviour
     {
         if (_powerOptions == null || _powerOptions.PowerOptionList == null || _powerOptions.PowerOptionList.Count == 0)
         {
-            _endTurnButton.interactable = false;
+           // _endTurnButton.interactable = false;
             return false;
         }
 
@@ -641,7 +843,7 @@ public partial class PowerInterpreter : MonoBehaviour
                     attackingEntity.GameObjectScript.transform.GetComponent<AnimationGen>().MinionAttackAnim(defendingEntity.GameObjectScript.gameObject);
                 }
 
-                var characterGen = entityExt.GameObjectScript.gameObject.GetComponent<AnimationGen>();
+                AnimationGen characterGen = entityExt.GameObjectScript.gameObject.GetComponent<AnimationGen>();
                 if (characterGen != null)
                 {
                     characterGen.DamageOrHealAnim(oldValue - tagChange.Value);
@@ -710,13 +912,13 @@ public partial class PowerInterpreter : MonoBehaviour
         }
 
         //only interpret minion, spell & weapons, no hero & hero power
-        if (entityExt.Tags.ContainsKey(GameTag.CARDTYPE)
-            && entityExt.CardType != CardType.MINION
-            && entityExt.CardType != CardType.SPELL
-            && entityExt.CardType != CardType.WEAPON)
-        {
-            throw new Exception($"No zone changes currently implemented for {entityExt.CardType} from {prevZone} to {nextZone}!");
-        }
+        //if (entityExt.Tags.ContainsKey(GameTag.CARDTYPE)
+        //    && entityExt.CardType != CardType.MINION
+        //    && entityExt.CardType != CardType.SPELL
+        //    && entityExt.CardType != CardType.WEAPON)
+        //{
+        //    throw new Exception($"No zone changes currently implemented for {entityExt.CardType} from {prevZone} to {nextZone}!");
+        //}
 
         switch (prevZone)
         {
@@ -756,6 +958,8 @@ public partial class PowerInterpreter : MonoBehaviour
                                 heroWeaponGen.Generate(entityExt);
                                 entityExt.GameObjectScript = heroWeaponGen;
                                 break;
+
+                  
 
                             default:
                                 Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
@@ -930,7 +1134,11 @@ public partial class PowerInterpreter : MonoBehaviour
         {
             case Zone.PLAY:
             case Zone.HAND:
-                _mainGame.transform.Find(GetParentObject("Board", entityExt)).GetComponent<CardContainer>().Order();
+                CardContainer card = _mainGame.transform.Find(GetParentObject("Board", entityExt)).GetComponent<CardContainer>();
+               if (card != null)
+                {
+                    card.Order();
+                }
                 break;
             default:
                 break;

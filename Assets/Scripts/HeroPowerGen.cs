@@ -23,6 +23,7 @@ public class HeroPowerGen : AnimationGen
 
         var exhausted = front.Find("Exhausted");
         exhausted.gameObject.SetActive(entity.Tags.ContainsKey(GameTag.EXHAUSTED) && entity.Tags[GameTag.EXHAUSTED] == 1);
+        GreenGlow.SetActive(entity.Tags.ContainsKey(GameTag.CANT_PLAY) && entity.Tags[GameTag.CANT_PLAY] != 1);
     }
 
     internal void Generate(EntityExt entity)

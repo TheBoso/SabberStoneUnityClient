@@ -35,6 +35,8 @@ public class AnimationGen : BasicGen
     private int cachedSiblingIndex;
     private GameObject _attackTarget;
 
+    public GameObject GreenGlow;
+
     public void Start()
     {
         var rootGameObjectList = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects().ToList();

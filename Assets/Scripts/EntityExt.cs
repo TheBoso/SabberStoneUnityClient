@@ -1,4 +1,5 @@
 ﻿using SabberStoneCore.Enums;
+using SabberStoneCore.Model;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -15,7 +16,6 @@ public class EntityExt
     public IDictionary<GameTag, int> Tags { get; set; } = new Dictionary<GameTag, int>();
 
     public CardType CardType => Tags.ContainsKey(GameTag.CARDTYPE) ? (CardType)Tags[GameTag.CARDTYPE] : CardType.INVALID;
-
     public Zone Zone => Tags.ContainsKey(GameTag.ZONE) ? (Zone)Tags[GameTag.ZONE] : Zone.INVALID;
 
     public int Health => Tags[GameTag.HEALTH] - Tags[GameTag.DAMAGE];
