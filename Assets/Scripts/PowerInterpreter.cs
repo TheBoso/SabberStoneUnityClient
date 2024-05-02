@@ -277,6 +277,8 @@ public partial class PowerInterpreter : MonoBehaviour
         GameConfig config = RagnarosVsNefarian;
         _game = new Game(config);
         _game.StartGame();
+        //  hook into our AIManager to let them know its time to play a game
+        AIManager.Instance.Init(_game);
     }
 
 

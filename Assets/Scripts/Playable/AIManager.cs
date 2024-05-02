@@ -1,13 +1,11 @@
-﻿using System;
-using SabberStoneBasicAI.Nodes;
+﻿using SabberStoneBasicAI.Nodes;
 using SabberStoneBasicAI.Score;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 using SabberStoneCore.Tasks.PlayerTasks;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class AIManager : MonoBehaviour
@@ -39,11 +37,29 @@ public class AIManager : MonoBehaviour
 
     public void PlayTurn()
     {
-        if (game != null && game.State == State.RUNNING && game.CurrentPlayer == game.Player2)
+        if (game == null)
+        {
+            return;
+        }
+
+        //  Skip past mulligan
+        if (game.Player1.MulliganState == Mulligan.INPUT)
+        {
+            Debug.Log("Player Process Mulligan");
+            game.Process(ChooseTask.Mulligan(game.Player1, new List<int>()));
+
+        }
+        if (game.Player2.MulliganState == Mulligan.INPUT)
+        {
+            Debug.Log("AI Process Mulligan");
+            game.Process(ChooseTask.Mulligan(game.Player2, new List<int>()));
+        }
+        if (game.State == State.RUNNING && game.CurrentPlayer == game.Player2)
         {
             List<OptionNode> solutions = OptionNode.GetSolutions(game, game.Player2.Id, scoring, 40, 40);
             var solution = new List<PlayerTask>();
             solutions.OrderByDescending(p => p.Score).First().PlayerTasks(ref solution);
+            Debug.Log("Running AI Turn");
             foreach (PlayerTask task in solution)
             {
 
