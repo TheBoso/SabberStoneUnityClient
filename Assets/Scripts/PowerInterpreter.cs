@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using SabberStoneBasicAI.Meta;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -270,6 +271,14 @@ public partial class PowerInterpreter : MonoBehaviour
         _btnStepper.interactable = true;
     }
 
+    public void InitializePlayable()
+    {      
+        SetPlayerAndUserInfo(1, null, null);
+        GameConfig config = RagnarosVsNefarian;
+        _game = new Game(config);
+        _game.StartGame();
+    }
+
 
     public void SetPlayerAndUserInfo(int playerId, UserInfo myUserInfo, UserInfo opUserInfo)
     {
@@ -317,6 +326,7 @@ public partial class PowerInterpreter : MonoBehaviour
 
     public void OnClickEndTurn()
     {
+        _game.Process(EndTurnTask.Any(_game.CurrentPlayer));
 
     }
 

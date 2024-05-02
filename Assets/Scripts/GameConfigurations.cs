@@ -250,6 +250,87 @@ public partial class PowerInterpreter
         return true;
     };
 
+
+    private GameConfig RagnarosVsNefarian => new GameConfig
+    {
+        StartPlayer = 1,
+        FormatType = FormatType.FT_WILD,
+
+
+        Player1HeroClass = CardClass.NEUTRAL,
+       Player1HeroCard = Cards.FromId("TBA01_1"),
+        Player1Deck = new List<Card>() {
+            Cards.FromId("EX1_249"),
+            Cards.FromId("EX1_620"),
+            Cards.FromId("EX1_620"),
+            Cards.FromId("CS2_032"),
+            Cards.FromId("CS2_032"),
+            Cards.FromId("CS2_042"),
+            Cards.FromId("CS2_042"),
+            Cards.FromId("EX1_241"),
+            Cards.FromId("EX1_241"),
+            Cards.FromId("EX1_319"),
+            Cards.FromId("EX1_319"),
+            Cards.FromId("BRMA_01"),
+            Cards.FromId("BRMA_01"),
+            Cards.FromId("BRMC_95h"),
+            Cards.FromId("BRMC_95h"),
+            Cards.FromId("BRMC_92"),
+            Cards.FromId("BRMC_99"),
+            Cards.FromId("BRMC_95"),
+            Cards.FromId("BRMC_96"),
+            Cards.FromId("BRMA05_3"),
+            Cards.FromId("BRMA05_3"),
+            Cards.FromId("BRMC_90"),
+            Cards.FromId("BRMC_90"),
+            Cards.FromId("BRMC_90"),
+            Cards.FromId("BRMC_85"),
+            Cards.FromId("BRMC_87"),
+            Cards.FromId("BRMC_91"),
+            Cards.FromId("BRMC_91"),
+            Cards.FromId("BRMC_89"),
+            Cards.FromId("BRMC_89")
+            },
+        Player2HeroClass = CardClass.MAGE,
+        Player2HeroCard = Cards.FromId("TBA01_4"),
+        Player2Deck = new List<Card>() {
+            Cards.FromId("BRM_034"),
+            Cards.FromId("BRM_034"),
+            Cards.FromId("BRM_033"),
+            Cards.FromId("BRM_033"),
+            Cards.FromId("BRM_033"),
+            Cards.FromId("BRM_031"),
+            Cards.FromId("EX1_562"),
+            Cards.FromId("BRM_029"),
+            Cards.FromId("EX1_570"),
+            Cards.FromId("EX1_570"),
+            Cards.FromId("BRM_018"),
+            Cards.FromId("BRM_018"),
+            Cards.FromId("EX1_303"),
+            Cards.FromId("EX1_303"),
+            Cards.FromId("BRMA14_3"),
+            Cards.FromId("BRMA14_7"),
+            Cards.FromId("BRMA14_9"),
+            Cards.FromId("BRMA14_5"),
+            Cards.FromId("BRMA10_5"),
+            Cards.FromId("BRMA10_5"),
+            Cards.FromId("BRMA10_5"),
+            Cards.FromId("BRMC_86"),
+            Cards.FromId("BRMC_84"),
+            Cards.FromId("BRMC_84"),
+            Cards.FromId("BRMC_88"),
+            Cards.FromId("BRMC_88"),
+            Cards.FromId("BRMC_83"),
+            Cards.FromId("BRMC_83"),
+            Cards.FromId("BRMC_98"),
+            Cards.FromId("BRMC_97")
+            },
+        SkipMulligan = true,
+        Shuffle = true,
+        FillDecks = false,
+        Logging = true,
+    };
+
     private GameConfig PaladinVsPriest(long seed) => new GameConfig
     {
         StartPlayer = 1,
