@@ -13,6 +13,7 @@ using SabberStoneCore.Kettle;
 
 public class CardGen : AnimationGen
 {
+    [SerializeField] private GameObject _playableGlow;
     internal void Show(bool showFlag)
     {
         transform.Find("Front").gameObject.SetActive(showFlag);
@@ -21,6 +22,8 @@ public class CardGen : AnimationGen
 
     public override void UpdateEntity(EntityExt entity)
     {
+        Debug.Log(entity.Print());
+        _entityExt = entity;
         base.UpdateEntity(entity);
 
         CardType cardType = (CardType)entity.Tags[GameTag.CARDTYPE];
@@ -75,8 +78,13 @@ public class CardGen : AnimationGen
             case CardType.HERO_POWER:
                 break;
         }
+        
     }
 
+    public void SetPlayableGlow(bool st)
+    {
+        _playableGlow.SetActive(st);
+    }
     private Sprite GetLegendarySprite(CardType cardType)
     {
         switch (cardType)
@@ -258,7 +266,7 @@ public class CardGen : AnimationGen
             case CardType.HERO_POWER:
                 break;
         }
-
+        
         // set to visible
         Show(true);
     }

@@ -7,18 +7,24 @@ using SabberStoneCore.Kettle;
 using SabberStoneCore.Model;
 using SabberStoneCore.Tasks.PlayerTasks;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Playable;
 using SabberStoneBasicAI.Meta;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using WaitForSeconds = UnityEngine.WaitForSeconds;
 
 public partial class PowerInterpreter : MonoBehaviour
 {
+    public Game Game => _game;
     private Dictionary<int, EntityExt> EntitiesExt = new Dictionary<int, EntityExt>();
 
     public GameObject HeroPrefab;
@@ -39,7 +45,8 @@ public partial class PowerInterpreter : MonoBehaviour
 
     private Transform gridParent, _mainGame, _myChoices, _myChoicesPanel;
 
-    public bool AllAnimStatesAreNone => EntitiesExt.Values.ToList().TrueForAll(p => p.GameObjectScript == null || p.GameObjectScript.AnimState == AnimationState.NONE);
+    public bool AllAnimStatesAreNone => EntitiesExt.Values.ToList().TrueForAll(p =>
+        p.GameObjectScript == null || p.GameObjectScript.AnimState == AnimationState.NONE);
 
     private int _playerId;
 
@@ -78,7 +85,9 @@ public partial class PowerInterpreter : MonoBehaviour
 
     public Text PowerHistoryText, PowerOptionsText, PowerChoicesText, PlayerStateText;
 
-    public EntityExt MyPlayer => EntitiesExt.Values.FirstOrDefault(p => p.Tags.TryGetValue(GameTag.PLAYER_ID, out int value) && value == _playerId);
+    public EntityExt MyPlayer =>
+        EntitiesExt.Values.FirstOrDefault(p =>
+            p.Tags.TryGetValue(GameTag.PLAYER_ID, out int value) && value == _playerId);
 
     private Func<int, Game, bool> _gameStepper;
 
@@ -129,7 +138,8 @@ public partial class PowerInterpreter : MonoBehaviour
 
         //consoleScrollRect = transform.parent.Find("Console").GetComponent<ScrollRect>();
         //gridParent = transform.parent.Find("Console").Find("Viewport").Find("Grid");
-        var rootGameObjectList = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects().ToList();
+        var rootGameObjectList =
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects().ToList();
         var menuCanvas = rootGameObjectList.Find(p => p.name == "MenuCanvas");
 
         var boardCanvas = rootGameObjectList.Find(p => p.name == "BoardCanvas");
@@ -150,7 +160,6 @@ public partial class PowerInterpreter : MonoBehaviour
         _historyEntries = new ConcurrentQueue<IPowerHistoryEntry>();
 
         _btnStepper = boardCanvas.transform.Find("Panel").Find("Buttons").Find("BtnStepper").GetComponent<Button>();
-
     }
 
     public void InitializeDebug()
@@ -174,23 +183,45 @@ public partial class PowerInterpreter : MonoBehaviour
                 _replayDataObjects.Enqueue(JsonConvert.DeserializeObject<GameData>(gameServerObject.Message));
             }
         }
+
         Debug.Log($"loaded {_replayDataObjects.Count} game data objects.");
 
-        if (!_replayDataObjects.TryDequeue(out GameData gameData) || gameData.GameDataType != GameDataType.Initialisation)
+        if (!_replayDataObjects.TryDequeue(out GameData gameData) ||
+            gameData.GameDataType != GameDataType.Initialisation)
         {
-            Debug.LogError("Couldn't dequeue the initialisation gamedata packet of the replay, please terminate the application!");
+            Debug.LogError(
+                "Couldn't dequeue the initialisation gamedata packet of the replay, please terminate the application!");
             return;
         }
 
         var userInfos = JsonConvert.DeserializeObject<List<UserInfo>>(gameData.GameDataObject);
-        SetPlayerAndUserInfo(gameData.PlayerId, userInfos.Where(p => p.PlayerId == gameData.PlayerId).First(), userInfos.Where(p => p.PlayerId != gameData.PlayerId).First());
+        SetPlayerAndUserInfo(gameData.PlayerId, userInfos.Where(p => p.PlayerId == gameData.PlayerId).First(),
+            userInfos.Where(p => p.PlayerId != gameData.PlayerId).First());
+    }
+
+    public void UpdateVisuals()
+    {
+        _game.PowerHistory.Last.ForEach(p =>
+        {
+            _historyEntries.Enqueue(p);
+            PowerHistoryText.text = _historyEntries.Count().ToString();
+        });
+        PowerHistoryText.text = _historyEntries.Count().ToString();
+
+        _powerEntityChoices = PowerChoicesBuilder.EntityChoices(_game, _game.Player1.Choice);
+
+        var powerOptions = PowerOptionsBuilder.AllOptions(_game, _game.Player1.Options());
+        _powerOptions = new PowerOptions()
+        {
+            Index = powerOptions.Index,
+            PowerOptionList = powerOptions.PowerOptionList
+        };
     }
 
     private void ReplayGame()
     {
-
-        while(_replayDataObjects.TryPeek(out GameData peekGameData) 
-            && peekGameData.GameDataType != GameDataType.PowerHistory)
+        while (_replayDataObjects.TryPeek(out GameData peekGameData)
+               && peekGameData.GameDataType != GameDataType.PowerHistory)
         {
             _replayDataObjects.TryDequeue(out GameData gameData);
 
@@ -201,7 +232,8 @@ public partial class PowerInterpreter : MonoBehaviour
 
                 case GameDataType.PowerChoices:
                     var powerChoices = JsonConvert.DeserializeObject<PowerChoices>(gameData.GameDataObject);
-                    _powerEntityChoices = new PowerEntityChoices(powerChoices.Index, powerChoices.ChoiceType, powerChoices.Entities);
+                    _powerEntityChoices = new PowerEntityChoices(powerChoices.Index, powerChoices.ChoiceType,
+                        powerChoices.Entities);
                     break;
 
                 case GameDataType.PowerChoice:
@@ -226,9 +258,12 @@ public partial class PowerInterpreter : MonoBehaviour
             }
         }
 
-        if (_replayDataObjects.TryDequeue(out GameData gameHistoryData) && gameHistoryData.GameDataType == GameDataType.PowerHistory)
+        if (_replayDataObjects.TryDequeue(out GameData gameHistoryData) &&
+            gameHistoryData.GameDataType == GameDataType.PowerHistory)
         {
-            var powerHistory = JsonConvert.DeserializeObject<List<IPowerHistoryEntry>>(gameHistoryData.GameDataObject, new PowerHistoryConverter());
+            var powerHistory =
+                JsonConvert.DeserializeObject<List<IPowerHistoryEntry>>(gameHistoryData.GameDataObject,
+                    new PowerHistoryConverter());
             powerHistory.ForEach(p => _historyEntries.Enqueue(p));
         }
     }
@@ -272,13 +307,27 @@ public partial class PowerInterpreter : MonoBehaviour
     }
 
     public void InitializePlayable()
-    {      
+    {
         SetPlayerAndUserInfo(1, null, null);
-        GameConfig config = RagnarosVsNefarian;
+        GameConfig config = PaladinVsPriest(Seed);
         _game = new Game(config);
+        FindObjectOfType<HandManager>().Setup(_game.Player1, _game);
         _game.StartGame();
+        UpdateVisuals();
         //  hook into our AIManager to let them know its time to play a game
-        AIManager.Instance.Init(_game);
+        if (AIManager.Instance)
+            AIManager.Instance.Init(_game);
+    }
+
+    /// <summary>
+    ///   Instead of calling game.Process call this, so it updates visuals after
+    /// </summary>
+    /// <param name="task"></param>
+    public void GameProcessWrapper(PlayerTask task)
+    {
+        Debug.Log($"Processing {task}");
+        _game.Process(task);
+        UpdateVisuals();
     }
 
 
@@ -303,8 +352,10 @@ public partial class PowerInterpreter : MonoBehaviour
     {
         if (UpdateUserInfo)
         {
-            _mainGame.transform.Find(GetParentObject("Stats", _playerId)).Find("AccountName").GetComponent<Text>().text = $"{_myUserInfo.AccountName}[{_myUserInfo.PlayerId}]";
-            _mainGame.transform.Find(GetParentObject("Stats", _opUserInfo.PlayerId)).Find("AccountName").GetComponent<Text>().text = $"{_opUserInfo.AccountName}[{_opUserInfo.PlayerId}]";
+            _mainGame.transform.Find(GetParentObject("Stats", _playerId)).Find("AccountName").GetComponent<Text>()
+                    .text = $"{_myUserInfo.AccountName}[{_myUserInfo.PlayerId}]";
+            _mainGame.transform.Find(GetParentObject("Stats", _opUserInfo.PlayerId)).Find("AccountName")
+                    .GetComponent<Text>().text = $"{_opUserInfo.AccountName}[{_opUserInfo.PlayerId}]";
             UpdateUserInfo = false;
         }
 
@@ -322,20 +373,19 @@ public partial class PowerInterpreter : MonoBehaviour
                 }
             }
 
-            _endTurnButton.interactable = PlayerState == PlayerClientState.Option;
+            _endTurnButton.interactable = true;
         }
     }
 
     public void OnClickEndTurn()
     {
-        _game.Process(EndTurnTask.Any(_game.CurrentPlayer));
-
+        GameProcessWrapper(EndTurnTask.Any(_game.CurrentPlayer));
     }
 
     //public void ReadHistory(List<IPowerHistoryEntry> powerHistoryEntries)
     public bool ReadHistory()
     {
-        if (_historyEntries.IsEmpty)
+        if (_historyEntries == null || _historyEntries.IsEmpty)
         {
             return false;
         }
@@ -358,14 +408,16 @@ public partial class PowerInterpreter : MonoBehaviour
 
     public bool ReadPowerChoices()
     {
-        if (_powerEntityChoices == null || _powerEntityChoices.Entities == null || _powerEntityChoices.Entities.Count == 0)
+        if (_powerEntityChoices == null || _powerEntityChoices.Entities == null ||
+            _powerEntityChoices.Entities.Count == 0)
         {
             _myChoices.gameObject.SetActive(false);
             _myChoicesPanel.gameObject.GetComponent<CardContainer>().Clear();
             return false;
         }
 
-        Debug.Log($"Current PowerChoices: {_powerEntityChoices.ChoiceType} with {_powerEntityChoices.Entities.Count} entities, {_powerEntityChoices.Index}");
+        Debug.Log(
+            $"Current PowerChoices: {_powerEntityChoices.ChoiceType} with {_powerEntityChoices.Entities.Count} entities, {_powerEntityChoices.Index}");
 
         PowerChoicesText.text = _powerEntityChoices != null ? "1" : "0";
 
@@ -373,7 +425,6 @@ public partial class PowerInterpreter : MonoBehaviour
 
         _powerEntityChoices.Entities.ForEach(p =>
         {
-
             if (!EntitiesExt.TryGetValue(p, out EntityExt entityExt))
             {
                 throw new Exception($"Can't find entity with the id {p} in our dictionary!");
@@ -417,7 +468,6 @@ public partial class PowerInterpreter : MonoBehaviour
 
     public void OnClickRandomMove()
     {
-
     }
 
     private void ReadHistoryEntry(IPowerHistoryEntry historyEntry)
@@ -546,7 +596,6 @@ public partial class PowerInterpreter : MonoBehaviour
 
     private void UpdateTagChange(PowerHistoryTagChange tagChange)
     {
-
         if (!EntitiesExt.TryGetValue(tagChange.EntityId, out EntityExt entityExt))
         {
             throw new Exception($"Can't find entity with the id {tagChange.EntityId} in our dictionary!");
@@ -576,6 +625,7 @@ public partial class PowerInterpreter : MonoBehaviour
                     _mainGame.transform.Find("MyHand").gameObject.SetActive(true);
                     _mainGame.transform.Find("OpHand").gameObject.SetActive(true);
                 }
+
                 break;
 
             case GameTag.MULLIGAN_STATE:
@@ -599,6 +649,7 @@ public partial class PowerInterpreter : MonoBehaviour
                         GameFinished(playState);
                         break;
                 }
+
                 break;
 
             case GameTag.PLAYSTATE:
@@ -626,7 +677,8 @@ public partial class PowerInterpreter : MonoBehaviour
             case GameTag.RESOURCES_USED:
             case GameTag.TEMP_RESOURCES:
                 //Debug.Log("UPDATE_RESOURCES");
-                _mainGame.transform.Find(GetParentObject("Mana", entityExt)).transform.Find("Mana").GetComponent<ManaGen>().Update(entityExt);
+                _mainGame.transform.Find(GetParentObject("Mana", entityExt)).transform.Find("Mana")
+                    .GetComponent<ManaGen>().Update(entityExt);
                 break;
 
             case GameTag.CURRENT_PLAYER:
@@ -646,11 +698,13 @@ public partial class PowerInterpreter : MonoBehaviour
 
             case GameTag.DAMAGE:
                 Debug.Log($"Doing damage ... to {entityExt.Name}");
-                if (entityExt == defendingEntity && attackingEntity.Zone == Zone.PLAY) // && attackingEntity.CardType == CardType.MINION)
+                if (entityExt == defendingEntity &&
+                    attackingEntity.Zone == Zone.PLAY) // && attackingEntity.CardType == CardType.MINION)
                 {
                     Debug.Log(".. attack animation now !!!");
                     //attackingEntity.GameObjectScript.transform.GetComponent<MinionAnimation>().AnimAttack(defendingEntity.GameObjectScript.gameObject);
-                    attackingEntity.GameObjectScript.transform.GetComponent<AnimationGen>().MinionAttackAnim(defendingEntity.GameObjectScript.gameObject);
+                    attackingEntity.GameObjectScript.transform.GetComponent<AnimationGen>()
+                        .MinionAttackAnim(defendingEntity.GameObjectScript.gameObject);
                 }
 
                 var characterGen = entityExt.GameObjectScript.gameObject.GetComponent<AnimationGen>();
@@ -700,7 +754,6 @@ public partial class PowerInterpreter : MonoBehaviour
                 //Debug.Log(tagChange.Print());
                 break;
         }
-
     }
 
     private void GameFinished(PlayState playState)
@@ -727,7 +780,8 @@ public partial class PowerInterpreter : MonoBehaviour
             && entityExt.CardType != CardType.SPELL
             && entityExt.CardType != CardType.WEAPON)
         {
-            throw new Exception($"No zone changes currently implemented for {entityExt.CardType} from {prevZone} to {nextZone}!");
+            throw new Exception(
+                $"No zone changes currently implemented for {entityExt.CardType} from {prevZone} to {nextZone}!");
         }
 
         switch (prevZone)
@@ -758,11 +812,13 @@ public partial class PowerInterpreter : MonoBehaviour
                                 minionGen.Generate(entityExt);
                                 entityExt.GameObjectScript = minionGen;
 
-                                _mainGame.transform.Find(GetParentObject("Board", entityExt)).GetComponent<CardContainer>().Add(gameObject);
+                                _mainGame.transform.Find(GetParentObject("Board", entityExt))
+                                    .GetComponent<CardContainer>().Add(gameObject);
                                 break;
 
                             case CardType.WEAPON:
-                                var heroWeaponParent = _mainGame.transform.Find(GetParentObject("HeroWeapon", entityExt));
+                                var heroWeaponParent =
+                                    _mainGame.transform.Find(GetParentObject("HeroWeapon", entityExt));
                                 gameObject = Instantiate(HeroWeaponPrefab, heroWeaponParent.transform).gameObject;
                                 heroWeaponGen = gameObject.GetComponent<HeroWeaponGen>();
                                 heroWeaponGen.Generate(entityExt);
@@ -770,28 +826,35 @@ public partial class PowerInterpreter : MonoBehaviour
                                 break;
 
                             default:
-                                Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
+                                Debug.Log(
+                                    $"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                                 break;
                         }
+
                         break;
 
                     case Zone.SETASIDE:
-                        Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
+                        Debug.Log(
+                            $"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                         break;
 
                     default:
-                        Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
+                        Debug.Log(
+                            $"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                         break;
                 }
+
                 break;
 
             case Zone.DECK:
-                _mainGame.transform.Find(GetParentObject("Deck", entityExt)).GetComponent<CardContainer>().Remove(entityExt.GameObjectScript.gameObject);
+                _mainGame.transform.Find(GetParentObject("Deck", entityExt)).GetComponent<CardContainer>()
+                    .Remove(entityExt.GameObjectScript.gameObject);
 
                 switch (nextZone)
                 {
                     case Zone.HAND:
-                        _mainGame.transform.Find(GetParentObject("Hand", entityExt)).GetComponent<CardContainer>().Add(entityExt.GameObjectScript.gameObject);
+                        _mainGame.transform.Find(GetParentObject("Hand", entityExt)).GetComponent<CardContainer>()
+                            .Add(entityExt.GameObjectScript.gameObject);
                         break;
                     case Zone.PLAY:
                         switch (entityExt.CardType)
@@ -801,24 +864,30 @@ public partial class PowerInterpreter : MonoBehaviour
                                 break;
 
                             default:
-                                Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
+                                Debug.Log(
+                                    $"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                                 break;
                         }
+
                         break;
                     default:
-                        Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
+                        Debug.Log(
+                            $"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                         break;
                 }
+
                 break;
 
             case Zone.HAND:
-                _mainGame.transform.Find(GetParentObject("Hand", entityExt)).GetComponent<CardContainer>().Remove(entityExt.GameObjectScript.gameObject);
+                _mainGame.transform.Find(GetParentObject("Hand", entityExt)).GetComponent<CardContainer>()
+                    .Remove(entityExt.GameObjectScript.gameObject);
                 switch (nextZone)
                 {
                     case Zone.DECK:
                         // MULLIGAN
                         entityExt.GameObjectScript.gameObject.GetComponent<CardGen>().Show(false);
-                        _mainGame.transform.Find(GetParentObject("Deck", entityExt)).GetComponent<CardContainer>().Add(entityExt.GameObjectScript.gameObject);
+                        _mainGame.transform.Find(GetParentObject("Deck", entityExt)).GetComponent<CardContainer>()
+                            .Add(entityExt.GameObjectScript.gameObject);
                         break;
                     case Zone.GRAVEYARD:
                         // DISCARD
@@ -826,7 +895,8 @@ public partial class PowerInterpreter : MonoBehaviour
                         break;
 
                     case Zone.PLAY:
-                        _mainGame.transform.Find(GetParentObject("Play", entityExt)).GetComponent<CardContainer>().Add(entityExt.GameObjectScript.gameObject);
+                        _mainGame.transform.Find(GetParentObject("Play", entityExt)).GetComponent<CardContainer>()
+                            .Add(entityExt.GameObjectScript.gameObject);
 
                         // destroying old object, as we are building a new one.
                         entityExt.GameObjectScript.gameObject.GetComponent<CardGen>().DestroyAnim();
@@ -843,15 +913,19 @@ public partial class PowerInterpreter : MonoBehaviour
                                 break;
 
                             default:
-                                Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
+                                Debug.Log(
+                                    $"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                                 break;
                         }
+
                         break;
 
                     default:
-                        Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
+                        Debug.Log(
+                            $"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                         break;
                 }
+
                 break;
 
             case Zone.PLAY:
@@ -859,7 +933,8 @@ public partial class PowerInterpreter : MonoBehaviour
                 switch (nextZone)
                 {
                     case Zone.HAND:
-                        _mainGame.transform.Find(GetParentObject("Board", entityExt)).GetComponent<CardContainer>().Remove(entityExt.GameObjectScript.gameObject);
+                        _mainGame.transform.Find(GetParentObject("Board", entityExt)).GetComponent<CardContainer>()
+                            .Remove(entityExt.GameObjectScript.gameObject);
                         Destroy(entityExt.GameObjectScript.gameObject);
                         entityExt.GameObjectScript = createCardIn("Hand", CardPrefab, entityExt);
                         break;
@@ -868,7 +943,8 @@ public partial class PowerInterpreter : MonoBehaviour
                         switch (entityExt.CardType)
                         {
                             case CardType.MINION:
-                                _mainGame.transform.Find(GetParentObject("Board", entityExt)).GetComponent<CardContainer>().Remove(entityExt.GameObjectScript.gameObject);
+                                _mainGame.transform.Find(GetParentObject("Board", entityExt))
+                                    .GetComponent<CardContainer>().Remove(entityExt.GameObjectScript.gameObject);
                                 entityExt.GameObjectScript.gameObject.GetComponent<MinionGen>().DestroyAnim();
                                 //Destroy(entityExt.GameObjectScript.gameObject);
                                 break;
@@ -883,15 +959,19 @@ public partial class PowerInterpreter : MonoBehaviour
                                 break;
 
                             default:
-                                Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
+                                Debug.Log(
+                                    $"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                                 break;
                         }
+
                         break;
 
                     default:
-                        Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
+                        Debug.Log(
+                            $"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                         break;
                 }
+
                 break;
 
             case Zone.GRAVEYARD:
@@ -905,16 +985,17 @@ public partial class PowerInterpreter : MonoBehaviour
                         break;
 
                     default:
-                        Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
+                        Debug.Log(
+                            $"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                         break;
                 }
+
                 break;
             case Zone.SECRET:
             default:
                 Debug.Log($"Not implemented! {entityExt.Name} - {prevZone} => {nextZone}, for {entityExt.CardType}!");
                 break;
         }
-
     }
 
     private void CreateWeapon(ref EntityExt entityExt)
@@ -993,7 +1074,6 @@ public partial class PowerInterpreter : MonoBehaviour
         {
             throw new Exception($"Can't find entity with the id {entity.EntityID} in our dictionary!");
         }
-
     }
 
     private void UpdateShowEntity(PowerHistoryShowEntity showEntity)
@@ -1019,7 +1099,6 @@ public partial class PowerInterpreter : MonoBehaviour
         {
             cardGen.ShowEntity(entity);
         }
-
     }
 
     private void UpdateTags(EntityExt value, string name, IDictionary<GameTag, int> tags)
@@ -1039,7 +1118,8 @@ public partial class PowerInterpreter : MonoBehaviour
                 {
                     if (keyValue.Key == GameTag.ZONE || keyValue.Key == GameTag.ZONE_POSITION)
                     {
-                        Debug.Log($"Ignoring[{value.Name}] => [CHANGE_TAG] {keyValue.Key}: {oldValue} => {keyValue.Value}");
+                        Debug.Log(
+                            $"Ignoring[{value.Name}] => [CHANGE_TAG] {keyValue.Key}: {oldValue} => {keyValue.Value}");
                     }
                     else
                     {
@@ -1054,7 +1134,6 @@ public partial class PowerInterpreter : MonoBehaviour
                 oldTags[keyValue.Key] = keyValue.Value;
             }
         }
-
     }
 
     private void UpdateFullEntity(PowerHistoryFullEntity fullEntity)
@@ -1072,7 +1151,9 @@ public partial class PowerInterpreter : MonoBehaviour
         };
         EntitiesExt.Add(fullEntity.Entity.Id, entityExt);
 
-        CardType cardType = entityExt.Tags.ContainsKey(GameTag.CARDTYPE) ? (CardType)entityExt.Tags[GameTag.CARDTYPE] : CardType.INVALID;
+        CardType cardType = entityExt.Tags.ContainsKey(GameTag.CARDTYPE)
+            ? (CardType)entityExt.Tags[GameTag.CARDTYPE]
+            : CardType.INVALID;
 
         Zone zone = entityExt.Tags.ContainsKey(GameTag.ZONE) ? (Zone)entityExt.Tags[GameTag.ZONE] : Zone.INVALID;
 
@@ -1086,7 +1167,8 @@ public partial class PowerInterpreter : MonoBehaviour
                 {
                     case CardType.HERO_POWER:
                         var heroPowerParent = _mainGame.transform.Find(GetParentObject("HeroPower", entityExt));
-                        var heroPower = Instantiate(HeroPowerPrefab, heroPowerParent).gameObject.GetComponent<HeroPowerGen>();
+                        var heroPower = Instantiate(HeroPowerPrefab, heroPowerParent).gameObject
+                            .GetComponent<HeroPowerGen>();
                         heroPower.Generate(entityExt);
                         entityExt.GameObjectScript = heroPower;
                         break;
@@ -1098,9 +1180,11 @@ public partial class PowerInterpreter : MonoBehaviour
                         minionGen.Generate(entityExt);
                         entityExt.GameObjectScript = minionGen;
 
-                        _mainGame.transform.Find(GetParentObject("Board", entityExt)).GetComponent<CardContainer>().Add(gameObject);
+                        _mainGame.transform.Find(GetParentObject("Board", entityExt)).GetComponent<CardContainer>()
+                            .Add(gameObject);
                         break;
                 }
+
                 break;
 
             case Zone.DECK:
@@ -1146,4 +1230,3 @@ public partial class PowerInterpreter : MonoBehaviour
         return null;
     }
 }
-

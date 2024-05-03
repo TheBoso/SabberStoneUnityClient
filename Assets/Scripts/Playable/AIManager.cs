@@ -6,6 +6,7 @@ using SabberStoneCore.Tasks.PlayerTasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using SabberStoneCore.Tasks;
 using UnityEngine;
 
 public class AIManager : MonoBehaviour
@@ -13,7 +14,7 @@ public class AIManager : MonoBehaviour
     public static AIManager Instance = null;
     private Game game;
     private IScore scoring;
-
+    private PowerInterpreter _power;
 
     private void Awake()
     {
@@ -21,6 +22,7 @@ public class AIManager : MonoBehaviour
         {
             Instance = this;
             scoring = new MidRangeScore();
+            _power = FindObjectOfType<PowerInterpreter>();
 
         }
         else
@@ -41,19 +43,7 @@ public class AIManager : MonoBehaviour
         {
             return;
         }
-
-        //  Skip past mulligan
-        if (game.Player1.MulliganState == Mulligan.INPUT)
-        {
-            Debug.Log("Player Process Mulligan");
-            game.Process(ChooseTask.Mulligan(game.Player1, new List<int>()));
-
-        }
-        if (game.Player2.MulliganState == Mulligan.INPUT)
-        {
-            Debug.Log("AI Process Mulligan");
-            game.Process(ChooseTask.Mulligan(game.Player2, new List<int>()));
-        }
+        
         if (game.State == State.RUNNING && game.CurrentPlayer == game.Player2)
         {
             List<OptionNode> solutions = OptionNode.GetSolutions(game, game.Player2.Id, scoring, 40, 40);
@@ -62,13 +52,14 @@ public class AIManager : MonoBehaviour
             Debug.Log("Running AI Turn");
             foreach (PlayerTask task in solution)
             {
+                Debug.Log("Running AI Action");
 
-                Debug.Log(task.FullPrint());
-                game.Process(task);
+                _power.GameProcessWrapper(task);
 
                 if (game.CurrentPlayer.Choice != null)
                     break;
             }
+            
         }
     }
 

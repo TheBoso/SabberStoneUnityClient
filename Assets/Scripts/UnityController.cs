@@ -84,6 +84,8 @@ public class UnityController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        return;
+        
         if (_queuedTime > 0)
         {
             _waitingTimeText.text = $"waiting .. {(int)(Time.time - _queuedTime) % 60} sec";
@@ -129,7 +131,10 @@ public class UnityController : MonoBehaviour
 
     void OnApplicationQuit()
     {
+        if (_gameClient != null)
+        {
         _gameClient.Disconnect();
+        }
     }
 
     internal void ProccessGameClientState(GameClientState oldState, GameClientState newState)

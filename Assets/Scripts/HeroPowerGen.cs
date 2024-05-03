@@ -22,7 +22,9 @@ public class HeroPowerGen : AnimationGen
         mana.text = entity.Tags[GameTag.COST].ToString();
 
         var exhausted = front.Find("Exhausted");
-        exhausted.gameObject.SetActive(entity.Tags.ContainsKey(GameTag.EXHAUSTED) && entity.Tags[GameTag.EXHAUSTED] == 1);
+        bool isExhausted = entity.Tags.ContainsKey(GameTag.EXHAUSTED) && entity.Tags[GameTag.EXHAUSTED] == 1;
+        exhausted.gameObject.SetActive(isExhausted);
+        frame.gameObject.SetActive(isExhausted == false);
     }
 
     internal void Generate(EntityExt entity)

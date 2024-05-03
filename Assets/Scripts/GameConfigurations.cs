@@ -403,7 +403,7 @@ public partial class PowerInterpreter
             Cards.FromName("Shattered Sun Cleric")
             },
         SkipMulligan = true,
-        Shuffle = false,
+        Shuffle = true,
         FillDecks = false,
         Logging = true,
         History = true,
