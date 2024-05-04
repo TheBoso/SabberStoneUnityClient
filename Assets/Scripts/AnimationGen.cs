@@ -54,7 +54,7 @@ public class AnimationGen : BasicGen
     }
 
     // Update is called once per frame
-    public void Update()
+    public virtual void Update()
     {
         switch(AnimState)
         {

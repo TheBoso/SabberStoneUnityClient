@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using SabberStoneCore.Enums;
-using SabberStoneCore.Kettle;
-using SabberStoneCore.Model.Entities;
+﻿using SabberStoneCore.Enums;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +6,7 @@ using UnityEngine.UI;
 public class HeroPowerGen : AnimationGen
 {
     private TextMeshProUGUI mana;
+    [SerializeField] private GameObject _playable;
 
     public override void UpdateEntity(EntityExt entity)
     {
@@ -25,7 +21,19 @@ public class HeroPowerGen : AnimationGen
         bool isExhausted = entity.Tags.ContainsKey(GameTag.EXHAUSTED) && entity.Tags[GameTag.EXHAUSTED] == 1;
         exhausted.gameObject.SetActive(isExhausted);
         frame.gameObject.SetActive(isExhausted == false);
+      
     }
+
+    public override void Update()
+    {
+        base.Update();
+        var heroPower = PowerInterpreter.instance.Game.Player1.Hero.HeroPower;
+        if (heroPower.Id == this._entityExt.Id)
+        {
+            _playable.SetActive(heroPower.IsPlayable);
+        }
+    }
+
 
     internal void Generate(EntityExt entity)
     {

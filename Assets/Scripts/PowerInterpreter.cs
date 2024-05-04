@@ -24,6 +24,7 @@ using WaitForSeconds = UnityEngine.WaitForSeconds;
 
 public partial class PowerInterpreter : MonoBehaviour
 {
+    public static PowerInterpreter instance = null;
     public Game Game => _game;
     private Dictionary<int, EntityExt> EntitiesExt = new Dictionary<int, EntityExt>();
 
@@ -75,6 +76,18 @@ public partial class PowerInterpreter : MonoBehaviour
     private int _currentPowerEntityChoicesIndex;
 
     private PowerOptions _powerOptions;
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     public void AddPowerOptions(PowerOptions powerOptions)
     {

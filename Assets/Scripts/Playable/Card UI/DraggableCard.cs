@@ -25,12 +25,21 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
     [SerializeField] private float maxRotationAngle = 30.0f; // Adjust this value as needed
 
 
-    public static readonly Vector2 PLAY_AREA_TOP_LEFT = new Vector2(133, 229);
-    public static readonly Vector2 PLAY_AREA_BOTTOM_RIGHT = new Vector2(648, 143);
+   // public static readonly Vector2 PLAY_AREA_TOP_LEFT = new Vector2(133, 229);
+   // public static readonly Vector2 PLAY_AREA_BOTTOM_RIGHT = new Vector2(648, 143);
+    
+    public static readonly Rect PLAY_AREA = new Rect(133, 143, 515, 86);
+    
 
     private Transform _oldParent;
     private int _cardIndex = -1;
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(PLAY_AREA.center, PLAY_AREA.size);
+    }
+    
     private void Awake()
     {
         _cam = Camera.main;
@@ -48,10 +57,7 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
 
     public bool IsWithinBounds(Vector2 point)
     {
-        return point.x >= PLAY_AREA_TOP_LEFT.x &&
-               point.x <= PLAY_AREA_BOTTOM_RIGHT.x &&
-               point.y >= PLAY_AREA_BOTTOM_RIGHT.y &&
-               point.y <= PLAY_AREA_TOP_LEFT.y;
+        return PLAY_AREA.Contains(point);
     }
 
     public void SetHandManager(HandManager mgr)
