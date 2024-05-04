@@ -792,6 +792,24 @@ public partial class PowerInterpreter : MonoBehaviour
         _mainGame.transform.Find("GameInfo").GetComponent<GameInfo>().GameInfoAnim(playState);
     }
 
+    public void HandleMinionMechanicSoudns(IDictionary<GameTag, int> mechanics)
+    {
+        
+        if (mechanics[GameTag.TAUNT] == 1)
+        {
+            AudioSource.PlayClipAtPoint(GameSettings.Instance.MinionTaunt, Vector3.zero);
+        }
+
+        if (mechanics[GameTag.DIVINE_SHIELD] == 1)
+        {
+            //  todo: divine shield sound
+        }
+
+        if (mechanics[GameTag.STEALTH] == 1)
+        {
+            // todo: stealth sound
+        }
+    }
     /// <summary>
     ///  Handles when a card goes from one zone to another ie hand to board
     /// </summary>
@@ -973,21 +991,7 @@ public partial class PowerInterpreter : MonoBehaviour
 
                                 }                        
                                 AudioSource.PlayClipAtPoint(clip, Vector3.zero);
-
-                                if (entityExt.Tags[GameTag.TAUNT] == 1)
-                                {
-                                    AudioSource.PlayClipAtPoint(GameSettings.Instance.MinionTaunt, Vector3.zero);
-                                }
-
-                                if (entityExt.Tags[GameTag.DIVINE_SHIELD] == 1)
-                                {
-                                    //  todo: divine shield sound
-                                }
-
-                                if (entityExt.Tags[GameTag.STEALTH] == 1)
-                                {
-                                    // todo: stealth sound
-                                }
+    HandleMinionMechanicSoudns(entityExt.Tags);
                                 break;
 
                             case CardType.WEAPON:
