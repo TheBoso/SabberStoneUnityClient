@@ -974,6 +974,20 @@ public partial class PowerInterpreter : MonoBehaviour
                                 }                        
                                 AudioSource.PlayClipAtPoint(clip, Vector3.zero);
 
+                                if (entityExt.Tags[GameTag.TAUNT] == 1)
+                                {
+                                    AudioSource.PlayClipAtPoint(GameSettings.Instance.MinionTaunt, Vector3.zero);
+                                }
+
+                                if (entityExt.Tags[GameTag.DIVINE_SHIELD] == 1)
+                                {
+                                    //  todo: divine shield sound
+                                }
+
+                                if (entityExt.Tags[GameTag.STEALTH] == 1)
+                                {
+                                    // todo: stealth sound
+                                }
                                 break;
 
                             case CardType.WEAPON:

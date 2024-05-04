@@ -29,8 +29,8 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
    // public static readonly Vector2 PLAY_AREA_BOTTOM_RIGHT = new Vector2(648, 143);
     
     public static readonly Rect _playArea = new Rect(133, 143, 515, 86);
-    
 
+    private RectTransform _rectTransform;
     private Transform _oldParent;
     private int _cardIndex = -1;
 
@@ -40,6 +40,8 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
         Gizmos.DrawWireCube(_playArea.center, _playArea.size);
     }
     
+
+    
     private void Awake()
     {
         _cam = Camera.main;
@@ -47,6 +49,8 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
         {
             _interpreter = FindObjectOfType<PowerInterpreter>();
         }
+
+        _rectTransform = transform as RectTransform;
     }
 
     private void Start()
@@ -88,18 +92,7 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
     {
         if (isDragging)
         {
-
-            Vector3 currentMousePos = default;
-            Vector3 mousePos = Input.mousePosition;
-            currentMousePos = mousePos;
-            Debug.Log($"Dragging {currentMousePos}");
-
-            // Move the object
-            // transform.localPosition = currentMousePosition;
-            (transform as RectTransform).anchoredPosition = currentMousePos;
-            lastMousePosition = currentMousePos;
-
-            if (IsWithinBounds(currentMousePos))
+            if (IsWithinBounds(lastMousePosition))
             {
                 Debug.Log("Within Bounds");
             }
@@ -115,9 +108,9 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
             return;
         }
 
-        Vector3 pos = (transform as RectTransform).anchoredPosition;
+        Vector3 pos = lastMousePosition;
         Debug.Log($"Our Position {pos}");
-        if (IsWithinBounds((transform as RectTransform).anchoredPosition))
+        if (IsWithinBounds(pos))
         {
             IPlayable playable = _handManager.GetPlayable(_cardIndex);
             if (playable != null)
@@ -142,6 +135,7 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
 
     public void OnDrag(PointerEventData eventData)
     {
-        
+        _rectTransform.anchoredPosition += eventData.delta;
+        this.lastMousePosition = _rectTransform.anchoredPosition / _oldParent.GetComponent<Canvas>().scaleFactor;
     }
 }
