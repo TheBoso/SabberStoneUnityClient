@@ -66,8 +66,12 @@ public class MinionGen : AnimationGen
         exhausted.gameObject.SetActive(entity.Tags.ContainsKey(GameTag.EXHAUSTED) && entity.Tags[GameTag.EXHAUSTED] == 1);
 
         var dead = front.Find("Dead");
-        dead.gameObject.SetActive(entity.Tags.ContainsKey(GameTag.TO_BE_DESTROYED) && entity.Tags[GameTag.TO_BE_DESTROYED] == 1);
-
+        bool isDead = entity.Tags.ContainsKey(GameTag.TO_BE_DESTROYED) && entity.Tags[GameTag.TO_BE_DESTROYED] == 1;
+        dead.gameObject.SetActive(isDead);
+        if (isDead)
+        {
+            AudioSource.PlayClipAtPoint(GameSettings.Instance.CharacterDiedSound, Vector3.zero);
+        }
         var deathrattle = frame.Find("Deathrattle");
         deathrattle.gameObject.SetActive(entity.Tags.ContainsKey(GameTag.DEATHRATTLE) && entity.Tags[GameTag.DEATHRATTLE] == 1);
 

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee38b30953ab9de469aab73be6cdd5da, type: 3}
+  m_Name: GameSettings
+  m_EditorClassIdentifier: 
+  <MinionPlaySound>k__BackingField: {fileID: 8300000, guid: b940f055ea0e03340ae822c1820edec5,
+    type: 3}
+  <MinionLandBoardSound>k__BackingField: {fileID: 8300000, guid: eb1f567fbc1bf634ab121f0005195f7a,
+    type: 3}
+  <MinionLandBoardMedium>k__BackingField: {fileID: 8300000, guid: 4a5a3f7ce547e284a94322efec57f880,
+    type: 3}
+  <MinionLandBoardHeavy>k__BackingField: {fileID: 8300000, guid: e894f63b2a6be934da7a923db4315d51,
+    type: 3}
+  <CharacterDamageLightSound>k__BackingField: {fileID: 0}
+  <CharacterDamageMediumSound>k__BackingField: {fileID: 0}
+  <CharacterDamageHeavySound>k__BackingField: {fileID: 0}
+  <CharacterDiedSound>k__BackingField: {fileID: 8300000, guid: c8ed8f81a19173844b85c1f663064b99,
+    type: 3}
+  <DrawCardSound>k__BackingField: {fileID: 8300000, guid: 15df44f26846bc44998bc77fce107870,
+    type: 3}
+  <AddCardToHandSound>k__BackingField: {fileID: 0}
+  <HeroPowerFlipOff>k__BackingField: {fileID: 8300000, guid: bbbaeeafa8593dd4a8e2d948fa80c6c3,
+    type: 3}
+  <HeroPowerFlipOn>k__BackingField: {fileID: 8300000, guid: 73cee579a08a55d4db15eb3f74d25e37,
+    type: 3}

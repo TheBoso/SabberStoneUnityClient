@@ -26,11 +26,20 @@ public class CardContainer : MonoBehaviour
     {
         entity.transform.SetParent(transform, false);
         Entities.Add(entity);
+
+        if (entity.TryGetComponent(out DraggableCard drag))
+        {
+            drag.CacheParent(transform);
+        }
     }
 
     internal void Remove(GameObject entity)
     {
         Entities.Remove(entity);
+        if (entity.TryGetComponent(out DraggableCard drag))
+        {
+            drag.CacheParent(null);
+        }
     }
 
     internal void Order()

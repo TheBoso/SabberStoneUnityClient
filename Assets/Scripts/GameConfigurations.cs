@@ -335,7 +335,7 @@ public partial class PowerInterpreter
     {
         StartPlayer = 1,
         FormatType = FormatType.FT_STANDARD,
-        Player1HeroClass = CardClass.PALADIN,
+        Player1HeroClass = CardClass.HUNTER,
         Player1Deck = new List<Card>() {
             Cards.FromName("Murloc Tidehunter"),
             Cards.FromName("Frostwolf Warlord"),

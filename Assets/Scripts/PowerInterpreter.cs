@@ -15,6 +15,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using DG.Tweening;
 using Playable;
 using SabberStoneBasicAI.Meta;
 using TMPro;
@@ -68,6 +69,9 @@ public partial class PowerInterpreter : MonoBehaviour
 
     private PowerEntityChoices _powerEntityChoices;
 
+    private Rect _playArea;
+    public Rect PlayerArea => _playArea;
+
     public void AddPowerEntityChoices(PowerEntityChoices entityChoices)
     {
         _powerEntityChoices = entityChoices;
@@ -82,6 +86,21 @@ public partial class PowerInterpreter : MonoBehaviour
         if (instance == null)
         {
             instance = this;
+            
+            // Calculate rectangle dimensions based on screen size
+            float screenWidth = Screen.width;
+            float screenHeight = Screen.height;
+        
+            // Define the size of the rectangle
+            float rectWidth = screenWidth * 0.6f; // 60% of screen width
+            float rectHeight = screenHeight * 0.4f; // 40% of screen height
+
+            // Calculate the position of the top-left corner of the rectangle
+            float rectX = (screenWidth - rectWidth) / 2f;
+            float rectY = (screenHeight - rectHeight) / 2f;
+
+            // Create the centered rectangle
+            _playArea = new Rect(rectX, rectY, rectWidth, rectHeight);
         }
         else
         {
@@ -338,7 +357,6 @@ public partial class PowerInterpreter : MonoBehaviour
     /// <param name="task"></param>
     public void GameProcessWrapper(PlayerTask task)
     {
-        Debug.Log($"Processing {task}");
         _game.Process(task);
         UpdateVisuals();
     }
@@ -774,6 +792,13 @@ public partial class PowerInterpreter : MonoBehaviour
         _mainGame.transform.Find("GameInfo").GetComponent<GameInfo>().GameInfoAnim(playState);
     }
 
+    /// <summary>
+    ///  Handles when a card goes from one zone to another ie hand to board
+    /// </summary>
+    /// <param name="entityExt"></param>
+    /// <param name="prevZone"></param>
+    /// <param name="nextZone"></param>
+    /// <exception cref="Exception"></exception>
     private void DoZoneChange(EntityExt entityExt, Zone prevZone, Zone nextZone)
     {
         Debug.Log($"{entityExt.Name} from {prevZone} to {nextZone}!");
@@ -814,6 +839,7 @@ public partial class PowerInterpreter : MonoBehaviour
 
                     case Zone.HAND:
                         entityExt.GameObjectScript = createCardIn("Hand", CardPrefab, entityExt);
+
                         break;
 
                     case Zone.PLAY:
@@ -866,8 +892,17 @@ public partial class PowerInterpreter : MonoBehaviour
                 switch (nextZone)
                 {
                     case Zone.HAND:
-                        _mainGame.transform.Find(GetParentObject("Hand", entityExt)).GetComponent<CardContainer>()
-                            .Add(entityExt.GameObjectScript.gameObject);
+                        var parentObject = _mainGame.transform.Find(GetParentObject("Hand", entityExt)).GetComponent<CardContainer>();
+                        entityExt.GameObjectScript.transform.position =
+                            _mainGame.transform.Find(GetParentObject("Deck", entityExt)).position;
+                        
+                        //  tween to move the card from our deck to the hand
+                        entityExt.GameObjectScript.transform.DOMove(parentObject.transform.position, 0.7f)
+                            .SetEase(Ease.InOutSine)
+                            .OnComplete(() => parentObject.Add(entityExt.GameObjectScript.gameObject));
+                        AudioSource.PlayClipAtPoint(GameSettings.Instance.DrawCardSound, Vector3.zero);
+           
+                        
                         break;
                     case Zone.PLAY:
                         switch (entityExt.CardType)
@@ -919,6 +954,26 @@ public partial class PowerInterpreter : MonoBehaviour
                         {
                             case CardType.MINION:
                                 CreateMinion(ref entityExt);
+                                int health = entityExt.Tags[GameTag.HEALTH];
+                                Vector3 soundSpot = Vector3.zero;
+                                AudioClip clip = null;
+                                //  land sound based on max health
+                                if (health > 7)
+                                {
+                                    clip = GameSettings.Instance.MinionLandBoardHeavy;
+                                }
+                                else if (health > 5)
+                                {
+                                    clip = GameSettings.Instance.MinionLandBoardMedium;
+                            
+                                }
+                                else
+                                {
+                                    clip = GameSettings.Instance.MinionLandBoardSound;
+
+                                }                        
+                                AudioSource.PlayClipAtPoint(clip, Vector3.zero);
+
                                 break;
 
                             case CardType.WEAPON:
@@ -1175,6 +1230,7 @@ public partial class PowerInterpreter : MonoBehaviour
             case Zone.INVALID:
                 break;
 
+            
             case Zone.PLAY:
                 switch (cardType)
                 {

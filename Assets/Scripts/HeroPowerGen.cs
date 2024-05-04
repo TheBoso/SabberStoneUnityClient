@@ -21,6 +21,15 @@ public class HeroPowerGen : AnimationGen
         bool isExhausted = entity.Tags.ContainsKey(GameTag.EXHAUSTED) && entity.Tags[GameTag.EXHAUSTED] == 1;
         exhausted.gameObject.SetActive(isExhausted);
         frame.gameObject.SetActive(isExhausted == false);
+        if (isExhausted == true)
+        {
+            AudioSource.PlayClipAtPoint(GameSettings.Instance.HeroPowerFlipOff, Vector3.zero);
+        }
+        else
+        {
+            AudioSource.PlayClipAtPoint(GameSettings.Instance.HeroPowerFlipOn, Vector3.zero);
+
+        }
       
     }
 
