@@ -21,6 +21,7 @@ using SabberStoneBasicAI.Meta;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 using WaitForSeconds = UnityEngine.WaitForSeconds;
 
 public partial class PowerInterpreter : MonoBehaviour
@@ -341,7 +342,7 @@ public partial class PowerInterpreter : MonoBehaviour
     public void InitializePlayable()
     {
         SetPlayerAndUserInfo(1, null, null);
-        GameConfig config = PaladinVsPriest(Seed);
+        GameConfig config = PaladinVsPriest(Random.seed);
         _game = new Game(config);
         FindObjectOfType<HandManager>().Setup(_game.Player1, _game);
         _game.StartGame();

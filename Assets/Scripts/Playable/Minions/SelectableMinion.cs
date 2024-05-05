@@ -20,7 +20,7 @@ public class SelectableMinion : Button
     }
     public void SelectMinion()
     {
-        transform.DOScale(Vector2.one * 1.2f, 0.25f);
+        transform.DOScale(Vector2.one * 1.1f, 0.25f);
     }
 
     public void DeselectMinion()

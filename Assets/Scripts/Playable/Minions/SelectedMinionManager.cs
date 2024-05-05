@@ -80,6 +80,10 @@ public class SelectedMinionManager : MonoBehaviour
       instance._selectedEntity = entity;
       if (instance._selectedEntity.GameObjectScript.TryGetComponent(out selectable))
       {
+         if (CardHolder.instance.TryGetCardDefinition(entity.CardId, out CardDefinition def))
+         {
+            AudioSource.PlayClipAtPoint(def.AttackSound, Vector3.zero);
+         }
          selectable.SelectMinion();
       }
    }

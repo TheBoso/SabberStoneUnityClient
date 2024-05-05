@@ -27,16 +27,16 @@ Debug.Log($"Defender {ent.CardId}", ent.GameObjectScript);
         }
 
         Transform oldParent = transform.parent;
-        int ourAttack = _minionGen._entityExt.Tags[GameTag.DAMAGE];
-        RectTransform target = ent.GameObjectScript.transform as RectTransform;
-        RectTransform rectTransform = transform as RectTransform;
-        Vector3 oldPosition = rectTransform.anchoredPosition;
+        int ourAttack = _minionGen._entityExt.Tags[GameTag.ATK];
+        Transform target = ent.GameObjectScript.transform;
+        Transform rectTransform = transform;
+        Vector3 oldPosition = rectTransform.position;
         Sequence seq = DOTween.Sequence();
         int index = transform.GetSiblingIndex();
       //  rectTransform.SetParent(null);
         
         //  tween to enemy character
-        seq.Append(rectTransform.DOLocalMove(target.position, 0.5f)
+        seq.Append(rectTransform.DOMove(target.position, 0.5f)
             .SetEase(Ease.InOutSine));
 
         seq.AppendCallback(() =>
@@ -63,7 +63,7 @@ Debug.Log($"Defender {ent.CardId}", ent.GameObjectScript);
             target.DOPunchScale(punchPower, 0.25f).SetEase(Ease.InOutSine);
         });
         //  tween back
-        seq.Append(rectTransform.DOLocalMove(oldPosition, 0.5f).SetEase(Ease.InOutSine));
+        seq.Append(rectTransform.DOMove(oldPosition, 0.5f).SetEase(Ease.InOutSine));
         Debug.Log("Starting Minion Attack");
         yield return seq.Play().WaitForCompletion();
     //    transform.SetParent(oldParent);
