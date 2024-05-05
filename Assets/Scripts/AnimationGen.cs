@@ -58,22 +58,6 @@ public class AnimationGen : BasicGen
     {
         switch(AnimState)
         {
-            case AnimationState.ATTACK:
-                transform.position = Vector3.Lerp(transform.position, _attackTarget.transform.position, 0.10f);
-
-                var mininionDistance = Vector3.Distance(transform.position, _attackTarget.transform.position);
-
-                if (mininionDistance < 30)
-                {
-                    _attackTarget = null;
-                    transform.localScale = cachedScale;
-                    transform.SetPositionAndRotation(cachedPosition, Quaternion.identity);
-                    transform.SetParent(cachedParent, false);
-                    transform.SetSiblingIndex(cachedSiblingIndex);
-                    AnimState = AnimationState.NONE;
-                }
-
-                break;
             case AnimationState.TARGETING:
                 _targetingTimer -= Time.deltaTime;
 

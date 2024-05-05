@@ -602,7 +602,7 @@ public partial class PowerInterpreter : MonoBehaviour
 
     private void UpdateBlockStart(PowerHistoryBlockStart blockStart)
     {
-        Debug.Log(blockStart.Print());
+        //Debug.Log(blockStart.Print());
         if (blockStart.BlockType == BlockType.PLAY && blockStart.Target != 0)
         {
             if (!EntitiesExt.TryGetValue(blockStart.Source, out EntityExt sourceEntityExt))
@@ -732,7 +732,7 @@ public partial class PowerInterpreter : MonoBehaviour
                 if (entityExt == defendingEntity &&
                     attackingEntity.Zone == Zone.PLAY) // && attackingEntity.CardType == CardType.MINION)
                 {
-                    MinionAttackHelper attackHelper = entityExt.GameObjectScript.GetComponent<MinionAttackHelper>();
+                    CharacterAttackHelper attackHelper = attackingEntity.GameObjectScript.GetComponent<CharacterAttackHelper>();
                     Debug.Log(".. attack animation now !!!");
                     //attackingEntity.GameObjectScript.transform.GetComponent<MinionAnimation>().AnimAttack(defendingEntity.GameObjectScript.gameObject);
                     ActionManager.AddToQueue(attackHelper.AttackRoutine(defendingEntity));
@@ -819,7 +819,7 @@ public partial class PowerInterpreter : MonoBehaviour
     /// <exception cref="Exception"></exception>
     private void DoZoneChange(EntityExt entityExt, Zone prevZone, Zone nextZone)
     {
-        Debug.Log($"{entityExt.Name} from {prevZone} to {nextZone}!");
+      //  Debug.Log($"{entityExt.Name} from {prevZone} to {nextZone}!");
 
         if (entityExt.CardType == CardType.HERO && nextZone == Zone.PLAY)
         {

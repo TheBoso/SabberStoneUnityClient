@@ -22,9 +22,12 @@ MonoBehaviour:
     type: 3}
   <MinionTaunt>k__BackingField: {fileID: 8300000, guid: dbd53ea476d56d144bdbd8b643bb2459,
     type: 3}
-  <CharacterDamageLightSound>k__BackingField: {fileID: 0}
-  <CharacterDamageMediumSound>k__BackingField: {fileID: 0}
-  <CharacterDamageHeavySound>k__BackingField: {fileID: 0}
+  <CharacterDamageLightSound>k__BackingField: {fileID: 8300000, guid: 615f578f365f4f7428cf7d43d23dc66e,
+    type: 3}
+  <CharacterDamageMediumSound>k__BackingField: {fileID: 8300000, guid: 103b013812ca3a04a90c1fd0f264daa8,
+    type: 3}
+  <CharacterDamageHeavySound>k__BackingField: {fileID: 8300000, guid: 1aeeff18e22c4014e92257ab747cba8a,
+    type: 3}
   <CharacterDiedSound>k__BackingField: {fileID: 8300000, guid: c8ed8f81a19173844b85c1f663064b99,
     type: 3}
   <DrawCardSound>k__BackingField: {fileID: 8300000, guid: 15df44f26846bc44998bc77fce107870,
