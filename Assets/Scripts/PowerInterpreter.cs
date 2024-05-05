@@ -732,10 +732,10 @@ public partial class PowerInterpreter : MonoBehaviour
                 if (entityExt == defendingEntity &&
                     attackingEntity.Zone == Zone.PLAY) // && attackingEntity.CardType == CardType.MINION)
                 {
+                    MinionAttackHelper attackHelper = entityExt.GameObjectScript.GetComponent<MinionAttackHelper>();
                     Debug.Log(".. attack animation now !!!");
                     //attackingEntity.GameObjectScript.transform.GetComponent<MinionAnimation>().AnimAttack(defendingEntity.GameObjectScript.gameObject);
-                    attackingEntity.GameObjectScript.transform.GetComponent<AnimationGen>()
-                        .MinionAttackAnim(defendingEntity.GameObjectScript.gameObject);
+                    ActionManager.AddToQueue(attackHelper.AttackRoutine(defendingEntity));
                 }
 
                 var characterGen = entityExt.GameObjectScript.gameObject.GetComponent<AnimationGen>();

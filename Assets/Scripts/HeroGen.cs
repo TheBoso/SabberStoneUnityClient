@@ -32,6 +32,7 @@ public class HeroGen : AnimationGen
     private GameObject dead;
 
     private PowerHistoryEntity heroEntity;
+    [SerializeField] private GameObject _canAttackGlow;
 
     public override void UpdateEntity(EntityExt entity)
     {
@@ -73,8 +74,10 @@ public class HeroGen : AnimationGen
         quest.SetActive(false);
 
         var exhausted = frame.Find("Exhausted");
-        exhausted.gameObject.SetActive(entity.Tags.ContainsKey(GameTag.EXHAUSTED) && entity.Tags[GameTag.EXHAUSTED] == 1);
-
+        bool isExhausted = entity.Tags.ContainsKey(GameTag.EXHAUSTED) && entity.Tags[GameTag.EXHAUSTED] == 1;
+        exhausted.gameObject.SetActive(isExhausted);
+        //  probably related to if we can attack?
+        _canAttackGlow.SetActive(isExhausted == false && entity.Tags[GameTag.ATK] > 0);
         dead = frame.Find("Dead").gameObject;
         dead.SetActive(entity.Tags[GameTag.TO_BE_DESTROYED] == 1);
     }

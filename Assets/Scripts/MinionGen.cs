@@ -10,6 +10,8 @@ using UnityEngine.UI;
 
 public class MinionGen : AnimationGen
 {
+    [SerializeField]
+    private GameObject _canAttackGlow;
     public override void UpdateEntity(EntityExt entity)
     {
         base.UpdateEntity(entity);
@@ -63,7 +65,10 @@ public class MinionGen : AnimationGen
         untargetable.gameObject.SetActive(entity.Tags.ContainsKey(GameTag.UNTOUCHABLE) && entity.Tags[GameTag.UNTOUCHABLE] == 1);
 
         var exhausted = front.Find("Exhausted");
-        exhausted.gameObject.SetActive(entity.Tags.ContainsKey(GameTag.EXHAUSTED) && entity.Tags[GameTag.EXHAUSTED] == 1);
+        bool isExhausted = entity.Tags.ContainsKey(GameTag.EXHAUSTED) && entity.Tags[GameTag.EXHAUSTED] == 1;
+        exhausted.gameObject.SetActive(isExhausted);
+        //  probably related to if we can attack?
+        _canAttackGlow.SetActive(isExhausted == false);
 
         var dead = front.Find("Dead");
         bool isDead = entity.Tags.ContainsKey(GameTag.TO_BE_DESTROYED) && entity.Tags[GameTag.TO_BE_DESTROYED] == 1;
@@ -83,6 +88,8 @@ public class MinionGen : AnimationGen
 
         var trigger = frame.Find("Trigger");
         trigger.gameObject.SetActive(false);
+
+
 
     }
 

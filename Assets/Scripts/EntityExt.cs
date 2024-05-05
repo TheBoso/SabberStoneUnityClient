@@ -35,5 +35,7 @@ public class EntityExt
         str.Append("]");
         return str.ToString();
     }
+
+    public bool IsExhausted => Tags.ContainsKey(GameTag.EXHAUSTED) && Tags[GameTag.EXHAUSTED] == 1;
 }
 

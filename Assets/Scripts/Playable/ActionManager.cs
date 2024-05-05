@@ -10,13 +10,13 @@ namespace Playable
     public class ActionManager : MonoBehaviour
     {
         public static ActionManager instance = null;
-        private Queue<Action> _queue;
+        private Queue<IEnumerator> _queue;
 
         private void Awake()
         {
             if (instance == null)
             {
-                _queue = new Queue<Action>();
+                _queue = new Queue<IEnumerator>();
                 instance = this;
             }
             else
@@ -31,7 +31,7 @@ namespace Playable
         }
 
 
-        public static void AddToQueue( Action func)
+        public static void AddToQueue( IEnumerator func)
         {
             instance._queue.Enqueue(func);
             Debug.Log($"Queue Count {instance._queue.Count}");
@@ -45,10 +45,9 @@ namespace Playable
                 yield return null;
                 if (_queue.Count > 0)
                 {
-                   Action routine = _queue.Peek();
+                   IEnumerator routine = _queue.Peek();
                    _queue.Dequeue();
-                   yield return new WaitForSeconds(1.0f);
-                   routine.Invoke();
+                   yield return routine;
 
                 }
             }
