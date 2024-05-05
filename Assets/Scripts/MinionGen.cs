@@ -75,6 +75,10 @@ public class MinionGen : AnimationGen
         dead.gameObject.SetActive(isDead);
         if (isDead)
         {
+            if (CardHolder.instance.TryGetCardDefinition(_entityExt.CardId, out CardDefinition def) && def.DeathSound != null)
+            {
+                AudioSource.PlayClipAtPoint(def.DeathSound, Vector3.zero);
+            }
             AudioSource.PlayClipAtPoint(GameSettings.Instance.CharacterDiedSound, Vector3.zero);
         }
         var deathrattle = frame.Find("Deathrattle");

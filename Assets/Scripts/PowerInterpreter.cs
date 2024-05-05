@@ -1266,7 +1266,10 @@ public partial class PowerInterpreter : MonoBehaviour
                         var minionGen = gameObject.GetComponent<MinionGen>();
                         minionGen.Generate(entityExt);
                         entityExt.GameObjectScript = minionGen;
-
+                        if (CardHolder.instance.TryGetCardDefinition(minionGen._entityExt.CardId, out CardDefinition def) && def.SummonSound != null)
+                        {
+                            AudioSource.PlayClipAtPoint(def.SummonSound, Vector3.zero);
+                        }
                         _mainGame.transform.Find(GetParentObject("Board", entityExt)).GetComponent<CardContainer>()
                             .Add(gameObject);
                         break;
