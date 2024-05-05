@@ -34,3 +34,7 @@ MonoBehaviour:
     type: 3}
   <HeroPowerFlipOn>k__BackingField: {fileID: 8300000, guid: 73cee579a08a55d4db15eb3f74d25e37,
     type: 3}
+  <LoseMana>k__BackingField: {fileID: 8300000, guid: b11ac168cb1ea64488a0dc213d28991a,
+    type: 3}
+  <GainMana>k__BackingField: {fileID: 8300000, guid: 7990c861ff770bd49a889c20135255b1,
+    type: 3}

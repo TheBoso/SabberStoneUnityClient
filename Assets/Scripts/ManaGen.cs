@@ -45,6 +45,16 @@ public class ManaGen : MonoBehaviour
         manaCurrent.text = (res + tmp - use).ToString();
         manaMax.text = (res + tmp).ToString();
 
+        if (use > 0)
+        {
+            AudioSource.PlayClipAtPoint(GameSettings.Instance.LoseMana, Vector3.zero);
+        }
+        else
+        {
+            AudioSource.PlayClipAtPoint(GameSettings.Instance.GainMana, Vector3.zero);
+
+        }
+
         while (manaCrystals.Count != res + tmp)
         {
             if (manaCrystals.Count < res + tmp)

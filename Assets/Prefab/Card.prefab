@@ -324,7 +324,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 763612851217556799}
-  - component: {fileID: 5942891413561907342}
   m_Layer: 5
   m_Name: Front
   m_TagString: Untagged
@@ -354,18 +353,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 290, y: 410}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &5942891413561907342
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 763612851217556798}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0fa38443ed7dd994fb70798f7de20db2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &763612851418902717
 GameObject:
   m_ObjectHideFlags: 0
@@ -516,6 +503,7 @@ GameObject:
   - component: {fileID: 763612851683870371}
   - component: {fileID: 763612851683870396}
   - component: {fileID: 7052064129622898675}
+  - component: {fileID: 1359424103909237137}
   m_Layer: 5
   m_Name: Card
   m_TagString: Untagged
@@ -577,6 +565,19 @@ MonoBehaviour:
   rotationSpeed: 5
   translationSpeed: 0.1
   maxRotationAngle: 30
+--- !u!114 &1359424103909237137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763612851683870370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fa38443ed7dd994fb70798f7de20db2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _back: {fileID: 763612851217556798}
 --- !u!1 &763612851911599350
 GameObject:
   m_ObjectHideFlags: 0

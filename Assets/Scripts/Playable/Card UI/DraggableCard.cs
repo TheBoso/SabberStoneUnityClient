@@ -8,6 +8,7 @@ using DG.Tweening;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
+using UnityEngine.UI;
 
 public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
@@ -25,23 +26,16 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
     [SerializeField] private float maxRotationAngle = 30.0f; // Adjust this value as needed
 
 
-   // public static readonly Vector2 PLAY_AREA_TOP_LEFT = new Vector2(133, 229);
-   // public static readonly Vector2 PLAY_AREA_BOTTOM_RIGHT = new Vector2(648, 143);
-    
-    public static readonly Rect _playArea = new Rect(133, 143, 515, 86);
+    // public static readonly Vector2 PLAY_AREA_TOP_LEFT = new Vector2(133, 229);
+    // public static readonly Vector2 PLAY_AREA_BOTTOM_RIGHT = new Vector2(648, 143);
 
     private RectTransform _rectTransform;
     private Transform _oldParent;
     private int _cardIndex = -1;
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(_playArea.center, _playArea.size);
-    }
-    
+ 
 
-    
+
     private void Awake()
     {
         _cam = Camera.main;
@@ -58,11 +52,6 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
         SetHandManager(FindObjectOfType<HandManager>());
     }
 
-    public bool IsWithinBounds(Vector2 point)
-    {
-        return _playArea.Contains(point);
-    }
-
     public void SetHandManager(HandManager mgr)
     {
         _handManager = mgr;
@@ -72,6 +61,7 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
     {
         _oldParent = parent;
     }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         _cardIndex = _handManager.GetHandCardIndex(transform);
@@ -92,7 +82,7 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
     {
         if (isDragging)
         {
-            if (IsWithinBounds(lastMousePosition))
+            if (BoardHelper.IsWithinBounds(lastMousePosition))
             {
                 Debug.Log("Within Bounds");
             }
@@ -110,12 +100,11 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
 
         Vector3 pos = lastMousePosition;
         Debug.Log($"Our Position {pos}");
-        if (IsWithinBounds(pos))
+        if (BoardHelper.IsWithinBounds(pos))
         {
             IPlayable playable = _handManager.GetPlayable(_cardIndex);
             if (playable != null)
             {
-                
                 // perform summon / cast
                 if (playable is Minion)
                 {
@@ -129,13 +118,19 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IEndDragHandler, 
             transform.SetParent(_oldParent);
             transform.SetSiblingIndex(_cardIndex);
             // if not, return to initial pos
-            (transform as RectTransform).DOAnchorPos(Vector2.zero, 0.25f).SetEase(Ease.OutSine);
+            (transform as RectTransform).DOAnchorPos(Vector2.zero, 0.25f).SetEase(Ease.OutSine).OnComplete(() =>
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(_oldParent as RectTransform);
+            });
         }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        _rectTransform.anchoredPosition += eventData.delta;
-        this.lastMousePosition = _rectTransform.anchoredPosition / _oldParent.GetComponent<Canvas>().scaleFactor;
+        if (isDragging)
+        {
+            _rectTransform.anchoredPosition += eventData.delta;
+            this.lastMousePosition = _rectTransform.anchoredPosition / MainCanvas.Canvas.scaleFactor;
+        }
     }
 }

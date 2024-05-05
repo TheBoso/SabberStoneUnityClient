@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 public class OnMouseHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -9,13 +11,12 @@ public class OnMouseHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     Vector3 cachedPosition;
     Quaternion cachedRotation;
 
-    void Start()
-    {
+    [FormerlySerializedAs("_back")] [SerializeField] private GameObject _front;
 
-    }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (_front.activeSelf == false) return;
         cachedScale = transform.localScale;
         cachedPosition = transform.position;
         cachedRotation = transform.rotation;
@@ -26,6 +27,7 @@ public class OnMouseHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        if (_front.activeSelf == false) return;
 
         transform.localScale = cachedScale;
         transform.SetPositionAndRotation(cachedPosition, Quaternion.identity);
