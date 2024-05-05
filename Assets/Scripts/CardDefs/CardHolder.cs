@@ -1,7 +1,10 @@
 // https://github.com/mtimkovich/hearthsounds/blob/master/hearthsounds.py - sound download
+
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Google.Protobuf.WellKnownTypes;
+using SabberStoneCore.Enums;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,7 +12,10 @@ public class CardHolder : MonoBehaviour
 {
     private const string SOUND_DIR = "Assets/Resources/CardAudio";
     private const string SOUND_BASE = "https://storage.googleapis.com/hearthsounds/";
-
+    
+    #if UNITY_EDITOR
+    private AudioClip[] _clips;
+    #endif
     private readonly string[] SOUND_TAGS = new string[]
     {
         "play",
@@ -81,6 +87,28 @@ public class CardHolder : MonoBehaviour
 
     private void DownloadSound(string cardID, CardSoundType soundType)
     {
+        CardDefinition card = _allCards[cardID];
+        if (_clips == null)
+        {
+            _clips = Resources.LoadAll<AudioClip>("CardSounds");
+        }
         
+        switch (soundType)
+        {
+            case CardSoundType.PLAY:
+                card.SummonSound = _clips.FirstOrDefault(x => x.name.Contains(cardID) && x.name.Contains("Play"));
+                break;
+            
+            case CardSoundType.DEATH:
+                card.DeathSound = _clips.FirstOrDefault(x => x.name.Contains(cardID) && x.name.Contains("Death"));
+                break;
+            
+            case CardSoundType.ATTACK:
+                card.AttackSound = _clips.FirstOrDefault(x => x.name.Contains(cardID) && x.name.Contains("Attack"));
+                break;
+            
+            case CardSoundType.TRIGGER:
+                break;
+        }
     }
 }

@@ -7,10 +7,10 @@ using UnityEngine;
 /// </summary>
 public class CardDefinition : ScriptableObject
 {
-    [field: SerializeField] public AudioClip SummonSound { get; private set; }
-    [field: SerializeField] public AudioClip DeathSound { get; private set; }
-    [field: SerializeField] public AudioClip AttackSound { get; private set; }
-    [field: SerializeField] public AudioClip SelectSound { get; private set; }
+    [field: SerializeField] public AudioClip SummonSound { get; set; }
+    [field: SerializeField] public AudioClip DeathSound { get;  set; }
+    [field: SerializeField] public AudioClip AttackSound { get;  set; }
+    [field: SerializeField] public AudioClip SelectSound { get;  set; }
 
 
 }
