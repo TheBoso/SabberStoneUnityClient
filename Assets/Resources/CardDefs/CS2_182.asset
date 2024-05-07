@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73a9bf92f9a451f468f7884f4af8f9e4, type: 3}
   m_Name: CS2_182
   m_EditorClassIdentifier: 
-  <SummonSound>k__BackingField: {fileID: 0}
-  <DeathSound>k__BackingField: {fileID: 0}
-  <AttackSound>k__BackingField: {fileID: 0}
+  <SummonSound>k__BackingField: {fileID: 8300000, guid: e6c08a4091fa0d249b8e81a4c8cfc3ca,
+    type: 3}
+  <DeathSound>k__BackingField: {fileID: 8300000, guid: 1714682d59d6a854486cd3499c2f4ea4,
+    type: 3}
+  <AttackSound>k__BackingField: {fileID: 8300000, guid: f64fad0efac6adc459abffc7bdcfc384,
+    type: 3}
   <SelectSound>k__BackingField: {fileID: 0}

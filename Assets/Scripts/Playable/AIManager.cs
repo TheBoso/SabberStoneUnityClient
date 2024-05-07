@@ -1,4 +1,6 @@
-﻿using SabberStoneBasicAI.Nodes;
+﻿using System;
+using System.Collections;
+using SabberStoneBasicAI.Nodes;
 using SabberStoneBasicAI.Score;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
@@ -6,6 +8,7 @@ using SabberStoneCore.Tasks.PlayerTasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using SabberStoneCore.Tasks;
 using UnityEngine;
 
@@ -15,6 +18,8 @@ public class AIManager : MonoBehaviour
     private Game game;
     private IScore scoring;
     private PowerInterpreter _power;
+    private WaitForSeconds _wait;
+    private WaitForSeconds _buffer;
 
     private void Awake()
     {
@@ -23,7 +28,8 @@ public class AIManager : MonoBehaviour
             Instance = this;
             scoring = new MidRangeScore();
             _power = FindObjectOfType<PowerInterpreter>();
-
+            _wait = new WaitForSeconds(1.0f);
+            _buffer = new WaitForSeconds(0.5f);
         }
         else
         {
@@ -34,37 +40,42 @@ public class AIManager : MonoBehaviour
     public void Init(Game game)
     {
         this.game = game;
+        StartCoroutine(UpdateRoutine());
+    }
+
+    private void OnDestroy()
+    {
+        game.MainCleanUp();
     }
 
 
-    public void PlayTurn()
+    private IEnumerator UpdateRoutine()
     {
-        if (game == null)
-        {
-            return;
-        }
+        List<PlayerTask> tasks = new List<PlayerTask>();
+        List<OptionNode> solutions;
         
-        if (game.State == State.RUNNING && game.CurrentPlayer == game.Player2)
+        while (true)
         {
-            List<OptionNode> solutions = OptionNode.GetSolutions(game, game.Player2.Id, scoring, 40, 40);
-            var solution = new List<PlayerTask>();
-            solutions.OrderByDescending(p => p.Score).First().PlayerTasks(ref solution);
-            Debug.Log("Running AI Turn");
-            foreach (PlayerTask task in solution)
+            yield return _buffer;
+            if (game.State == State.RUNNING && game.CurrentPlayer == game.Player2)
             {
-                Debug.Log("Running AI Action");
+                tasks.Clear();
+                solutions = OptionNode.GetSolutions(game, game.Player2.Id, scoring, 20, 20);
+                //  get highest scored solution
+                if (solutions.Count > 1)
+                {
+                    solutions.OrderByDescending(x => x.Score).First().PlayerTasks(ref tasks);
 
-                _power.GameProcessWrapper(task);
+                    foreach (PlayerTask task in tasks)
+                    {
+                        yield return _wait;
+                        _power.GameProcessWrapper(task);
 
-                if (game.CurrentPlayer.Choice != null)
-                    break;
+                        if (game.CurrentPlayer.Choice != null)
+                            break;
+                    }
+                }
             }
-            
         }
-    }
-
-    private void Update()
-    {
-        PlayTurn();
     }
 }

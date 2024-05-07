@@ -926,7 +926,7 @@ public partial class PowerInterpreter : MonoBehaviour
                         switch (entityExt.CardType)
                         {
                             case CardType.MINION:
-                                CreateMinion(ref entityExt);
+                                ActionManager.AddToQueue(CreateMinion(entityExt));
                                 break;
 
                             default:
@@ -971,7 +971,7 @@ public partial class PowerInterpreter : MonoBehaviour
                         switch (entityExt.CardType)
                         {
                             case CardType.MINION:
-                                CreateMinion(ref entityExt);
+                                ActionManager.AddToQueue(CreateMinion(entityExt));
                                 int health = entityExt.Tags[GameTag.HEALTH];
                                 Vector3 soundSpot = Vector3.zero;
                                 AudioClip clip = null;
@@ -1093,8 +1093,9 @@ public partial class PowerInterpreter : MonoBehaviour
         entityExt.GameObjectScript = heroWeaponGen;
     }
 
-    private void CreateMinion(ref EntityExt entityExt)
+    private IEnumerator CreateMinion(EntityExt entityExt)
     {
+        yield return new WaitForSeconds(0.5f);
         var gameObject = Instantiate(MinionPrefab, _mainGame.transform).gameObject;
         var minionGen = gameObject.GetComponent<MinionGen>();
         minionGen.Generate(entityExt);
@@ -1105,6 +1106,7 @@ public partial class PowerInterpreter : MonoBehaviour
         }
         _mainGame.transform.Find(GetParentObject("Board", entityExt)).GetComponent<CardContainer>().Add(gameObject);
     }
+    
 
     private void DoZonePositionChange(EntityExt entityExt)
     {

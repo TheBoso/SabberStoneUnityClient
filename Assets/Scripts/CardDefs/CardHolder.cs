@@ -73,6 +73,7 @@ public class CardHolder : MonoBehaviour
             def = card;
             _allCards.Add(id,def);
             TryDownloadSounds(id);
+            AssetDatabase.SaveAssets();
             return true;
         }
     }
@@ -110,5 +111,7 @@ public class CardHolder : MonoBehaviour
             case CardSoundType.TRIGGER:
                 break;
         }
+        
+        UnityEditor.EditorUtility.SetDirty(card);
     }
 }

@@ -71,7 +71,8 @@ public class SelectedMinionManager : MonoBehaviour
       SelectableMinion selectable = null;
       if (instance._selectedEntity != null)
       {
-         if(instance._selectedEntity.GameObjectScript.TryGetComponent(out selectable))
+         if(instance._selectedEntity.GameObjectScript != null && 
+            instance._selectedEntity.GameObjectScript.TryGetComponent(out selectable))
          {
             selectable.DeselectMinion();
          }

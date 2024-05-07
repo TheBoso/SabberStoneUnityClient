@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 73a9bf92f9a451f468f7884f4af8f9e4, type: 3}
-  m_Name: EX1_066
+  m_Name: CS2_235
   m_EditorClassIdentifier: 
-  <SummonSound>k__BackingField: {fileID: 8300000, guid: d7147cfd5be9b9d48ad9c058748a40f4,
+  <SummonSound>k__BackingField: {fileID: 8300000, guid: 245b4359bd119fb498245138ca817f1c,
     type: 3}
-  <DeathSound>k__BackingField: {fileID: 8300000, guid: 2272d933533070741bc860218bf34ca8,
+  <DeathSound>k__BackingField: {fileID: 8300000, guid: 6971e63d300d58045803b2911505e0e8,
     type: 3}
-  <AttackSound>k__BackingField: {fileID: 8300000, guid: d7942af7bd1a0d440bf8c74b95e33796,
+  <AttackSound>k__BackingField: {fileID: 8300000, guid: 1014af3553da3464c871ceb17bb17861,
     type: 3}
   <SelectSound>k__BackingField: {fileID: 0}

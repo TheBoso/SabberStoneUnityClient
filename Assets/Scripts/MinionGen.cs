@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Kettle;
 using SabberStoneCore.Model.Entities;
@@ -80,6 +81,13 @@ public class MinionGen : AnimationGen
                 AudioSource.PlayClipAtPoint(def.DeathSound, Vector3.zero);
             }
             AudioSource.PlayClipAtPoint(GameSettings.Instance.CharacterDiedSound, Vector3.zero);
+
+            foreach (var obj in dead.GetComponentsInChildren<Renderer>())
+            {
+                obj.material.color = Color.gray;
+            }
+
+            dead.DOPunchPosition(Vector3.one * 0.5f, 0.25f);
         }
         var deathrattle = frame.Find("Deathrattle");
         deathrattle.gameObject.SetActive(entity.Tags.ContainsKey(GameTag.DEATHRATTLE) && entity.Tags[GameTag.DEATHRATTLE] == 1);
